@@ -2,12 +2,14 @@
 
 ## Prerequisites
 
-`npm install -g gulp-cli`
-`npm install -g flow-typed`
+1. `npm install -g gulp-cli`
+2. `npm install -g flow-typed`
 
 ## Setup
 
 Clone the repository
-`npm install`
-`flow-typed install`
-`gulp` to watch files and automatically rebuild / flow type check
+
+1. `npm install`
+2. `flow-typed install`
+3. `gulp` to watch files and automatically rebuild / flow type check
+4. Start developing
