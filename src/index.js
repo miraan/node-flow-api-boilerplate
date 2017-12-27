@@ -6,6 +6,8 @@ import * as http from 'http'
 import debug from 'debug'
 import Api from './Api'
 
+import type { Debugger } from 'debug'
+
 declare interface ErrnoError extends Error {
   errno?: number,
   code?: string,
@@ -13,9 +15,9 @@ declare interface ErrnoError extends Error {
   syscall?: string,
 }
 
-const PROJECT_NAME = 'node-flow-api'
-const logger = debug(`${PROJECT_NAME}:startup`)
-const app: Api = new Api()
+const PROJECT_NAME: string = 'node-flow-api'
+const logger: Debugger = debug(`${PROJECT_NAME}:startup`)
+const app: Api = new Api(logger)
 const DEFAULT_PORT: number = 3000
 const port: string | number = normalizePort(process.env.PORT)
 const server: Server = http.createServer(app.express)

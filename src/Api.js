@@ -5,11 +5,15 @@ import morgan from 'morgan'
 import bodyParser from 'body-parser'
 import ProduceRouter from './routers/ProduceRouter'
 
+import type { Debugger } from 'debug'
+
 export default class Api {
   express: express$Application
+  logger: Debugger
 
-  constructor() {
+  constructor(logger: Debugger) {
     this.express = express()
+    this.logger = logger
     this.initMiddleware()
     this.initRoutes()
   }
@@ -21,7 +25,7 @@ export default class Api {
   }
 
   initRoutes(): void {
-    const produceRouter = new ProduceRouter()
+    const produceRouter = new ProduceRouter(this.logger)
     this.express.use(produceRouter.path, produceRouter.router)
   }
 }
