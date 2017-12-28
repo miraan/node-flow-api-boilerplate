@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "DEBUG=\"node-flow-api:*\" node build/index.js",
+    "start": "DEBUG=\"node-flow-api:*\" nodemon build/index.js",
     "test": "jest"
   },
   "author": "",
@@ -17,12 +17,16 @@
     "body-parser": "^1.18.2",
     "debug": "^3.1.0",
     "express": "^4.16.2",
+    "fb": "^2.0.0",
     "flow-bin": "^0.61.0",
     "gulp": "^3.9.1",
     "gulp-babel": "^7.0.0",
     "gulp-flowtype": "^1.0.0",
     "gulp-sourcemaps": "^2.6.2",
-    "morgan": "^1.9.0"
+    "morgan": "^1.9.0",
+    "passport": "^0.4.0",
+    "passport-http-bearer": "^1.0.1",
+    "redis": "^2.8.0"
   },
   "devDependencies": {
     "jest": "^22.0.4",
