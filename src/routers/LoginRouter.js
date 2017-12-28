@@ -5,7 +5,7 @@ import FacebookClient from '../util/FacebookClient'
 import crypto from 'crypto'
 import path from 'path'
 import users from '../../data/users'
-import { saveUsers } from '../util/save'
+import { saveUsers, genUserId } from '../util/save'
 
 import type { Debugger } from 'debug'
 import type { RedisClient } from 'redis'
@@ -26,23 +26,30 @@ export default class LoginRouter {
     this.init()
   }
 
-  init(): void {
+  init = () => {
     this.router.get('/facebook', this.facebookLogin)
   }
 
-  facebookLogin(req: $Request, res: $Response): void {
+  facebookLogin = (req: $Request, res: $Response) => {
     const facebookAccessToken = req.query.facebookAccessToken
+    if (!facebookAccessToken) {
+      res.json({ error: 'Facebook Access Token Required.' })
+      return
+    }
     const extendTokenPromise = this.facebookClient.extendFacebookAccessToken(facebookAccessToken)
-    const getProfilePromise = extendTokenPromise.then(newFacebookAccessToken =>
-      this.facebookClient.getProfile(newFacebookAccessToken))
-    Promise.all([extendTokenPromise, getProfilePromise]).then(([newFacebookAccessToken, facebookProfile]) => {
+    const getProfilePromise = extendTokenPromise.then(newFacebookAccessToken => {
+      return this.facebookClient.getProfile(newFacebookAccessToken)
+    })
+    Promise.all([extendTokenPromise, getProfilePromise])
+    .then(([newFacebookAccessToken, facebookProfile]) => {
       let user = users.find(user => user.facebookId === facebookProfile.facebookId)
       if (!user) {
         user = {
-          id: '',
+          id: genUserId(users),
           firstName: facebookProfile.firstName,
           lastName: facebookProfile.lastName,
           facebookId: facebookProfile.facebookId,
+          email: facebookProfile.email,
           facebookAccessToken: newFacebookAccessToken,
         }
         users.push(user)

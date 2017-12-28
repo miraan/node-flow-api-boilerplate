@@ -7,6 +7,7 @@ type FacebookProfile = {
   facebookId: string,
   firstName: string,
   lastName: string,
+  email: string,
 }
 
 export default class FacebookClient {
@@ -23,7 +24,7 @@ export default class FacebookClient {
           return
         }
         if (res.error) {
-          reject('Extend Facebook Token Error: ' + res.error)
+          reject('Extend Facebook Token Error: ' + res.error.message)
           return
         }
         resolve(res.access_token)
@@ -34,7 +35,7 @@ export default class FacebookClient {
   getProfile(facebookAccessToken: string): Promise<FacebookProfile> {
     return new Promise((resolve, reject) => {
       FB.api('me', {
-        fields: 'id,first_name,last_name',
+        fields: 'id,first_name,last_name,email',
         access_token: facebookAccessToken
       }, res => {
         if (!res) {
@@ -45,12 +46,11 @@ export default class FacebookClient {
           reject('Get Facebook Profile Error: ' + res.error)
           return
         }
-        console.log('Get Profile Result:')
-        console.log(res)
         resolve({
-          facebookId: '1234',
-          firstName: 'Miraan',
-          lastName: 'Tabrez',
+          facebookId: res.id,
+          firstName: res.first_name,
+          lastName: res.last_name,
+          email: res.email,
         })
       })
     })

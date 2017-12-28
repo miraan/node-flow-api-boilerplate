@@ -49,10 +49,11 @@ export default class ProduceRouter {
     }
   }
 
-  postOne(req: $Request, res: $Response): void {
+  postOne = (req: $Request, res: $Response) => {
+    console.log(this)
     if (parseProduce(req.body)) {
       const newProduce = req.body
-      newProduce.id = genProduceId(newProduce, inventory)
+      newProduce.id = genProduceId(inventory)
       inventory.push(newProduce)
       res.status(200).json({
         status: 200,
@@ -78,7 +79,7 @@ export default class ProduceRouter {
     }
   }
 
-  updateOneById(req: $Request, res: $Response): void {
+  updateOneById = (req: $Request, res: $Response) => {
     const searchId: number | boolean = parseId(req.params)
     const payload: any = parseUpdate(req.body)
     let toUpdate: Produce = inventory.find(item => item.id === searchId)
@@ -112,7 +113,7 @@ export default class ProduceRouter {
     }
   }
 
-  removeById(req: $Request, res: $Response): void {
+  removeById = (req: $Request, res: $Response) => {
     const searchId: number | boolean = parseId(req.params)
     let toDel: number = inventory.findIndex(item => item.id === searchId)
     if (toDel !== -1) {

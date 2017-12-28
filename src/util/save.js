@@ -29,12 +29,23 @@ export function saveUsers(users: Array<any>): Promise<string> {
   })
 }
 
-export function genProduceId(prod: Produce, inv: Array<Produce>): number {
+export function genProduceId(inv: Array<Produce>): number {
   if (typeof inv[0].id === 'undefined') {
     return 1
   }
   let maxId: number = inv[0].id
   inv.slice(1).forEach(item => {
+    if (item.id && item.id > maxId) maxId = item.id
+  })
+  return maxId + 1
+}
+
+export function genUserId(users: Array<any>): number {
+  if (typeof users[0].id === 'undefined') {
+    return 1
+  }
+  let maxId: number = users[0].id
+  users.slice(1).forEach(item => {
     if (item.id && item.id > maxId) maxId = item.id
   })
   return maxId + 1
