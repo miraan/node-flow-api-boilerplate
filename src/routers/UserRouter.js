@@ -29,7 +29,8 @@ export default class UserRouter {
     this.router.get('/', passportBearerAuthenticated, this.getAll)
     this.router.get('/:id', passportBearerAuthenticated, this.getById)
     this.router.post('/', passportBearerAuthenticated, this.postOne)
-    this.router.put('/:id', passportBearerAuthenticated, this.updateOneById)
+    this.router.put('/:id', passportBearerAuthenticated, this.updateById)
+    this.router.delete('/:id', passportBearerAuthenticated, this.removeById)
   }
 
   getProfile = (req: $Request, res: $Response) => {
@@ -112,18 +113,10 @@ export default class UserRouter {
         user: newUser
       }
     })
-    saveUsers(users)
-    .then(writePath => {
-      this.logger(`Users updated. Written to:\n\t` +
-        `${path.relative(path.join(__dirname, '..', '..'), writePath)}`)
-    })
-    .catch(err => {
-      this.logger('Error writing to users file.')
-      this.logger(err.stack)
-    })
+    this.saveUsersFile()
   }
 
-  updateOneById = (req: $Request, res: $Response) => {
+  updateById = (req: $Request, res: $Response) => {
     const user: User = req.user
     const id = parseInt(req.params.id, 10)
     if (user.id !== id && (!user.level || user.level < 2)) {
@@ -164,6 +157,38 @@ export default class UserRouter {
         user: record
       }
     })
+    this.saveUsersFile()
+  }
+
+  removeById = (req: $Request, res: $Response) => {
+    const user: User = req.user
+    const id = parseInt(req.params.id, 10)
+    if (user.id !== id && (!user.level || user.level < 2)) {
+      res.status(401).json({
+        success: false,
+        errorMessage: 'Unauthorized.'
+      })
+      return
+    }
+    const recordIndex: number = users.findIndex(item => item.id === id)
+    if (recordIndex === -1) {
+      res.status(400).json({
+        success: false,
+        errorMessage: 'No user with that ID exists.'
+      })
+      return
+    }
+    const deletedRecord = users.splice(recordIndex, 1)[0]
+    res.status(200).json({
+      success: true,
+      content: {
+        user: deletedRecord
+      }
+    })
+    this.saveUsersFile()
+  }
+
+  saveUsersFile = () => {
     saveUsers(users)
     .then(writePath => {
       this.logger(`Users updated. Written to:\n\t` +
