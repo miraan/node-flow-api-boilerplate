@@ -6,9 +6,3 @@ export type Produce = {
   quantity: number,
   price: number,
 }
-
-export type User = {
-  id: number,
-  firstName: string,
-  lastName: string,
-}

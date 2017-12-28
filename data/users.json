@@ -2,16 +2,19 @@
   {
     "id": 1,
     "firstName": "Miraan",
-    "lastName": "Tabrez"
+    "lastName": "Tabrez",
+    "facebookId": "1234"
   },
   {
     "id": 2,
     "firstName": "Joe",
-    "lastName": "Bloggs"
+    "lastName": "Bloggs",
+    "facebookId": "786"
   },
   {
     "id": 3,
     "firstName": "Amy",
-    "lastName": "Pond"
+    "lastName": "Pond",
+    "facebookId": "456"
   }
 ]

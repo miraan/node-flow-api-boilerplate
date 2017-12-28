@@ -1,18 +1,28 @@
 // @flow
 
 import { Router } from 'express'
+import FacebookClient from '../util/FacebookClient'
+import crypto from 'crypto'
+import path from 'path'
+import users from '../../data/users'
+import { saveUsers } from '../util/save'
 
 import type { Debugger } from 'debug'
+import type { RedisClient } from 'redis'
 
 export default class LoginRouter {
   router: Router
   path: string
   logger: Debugger
+  redisClient: RedisClient
+  facebookClient: FacebookClient
 
-  constructor(logger: Debugger, path: string = '/api/v1/login') {
+  constructor(redisClient: RedisClient, logger: Debugger, path: string = '/api/v1/login') {
     this.router = Router()
     this.path = path
     this.logger = logger
+    this.redisClient = redisClient
+    this.facebookClient = new FacebookClient()
     this.init()
   }
 
@@ -21,20 +31,35 @@ export default class LoginRouter {
   }
 
   facebookLogin(req: $Request, res: $Response): void {
-    const facebookAccessToken: string = req.query.facebookAccessToken
-    if (!facebookAccessToken) {
-      res.json({ error: 'Invalid facebook access token.' })
-    } else {
-      res.json({ token: '12345' })
-    }
-    /* TODO
-        1. Get long lived access token from Facebook, return error if this fails
-        2. Get Facebook user profile with new access token, return error if this fails
-        3. Retrive user from DB with matching Facebook User ID
-        4. If the user exists, update their facebookAccessToken field with the new long lived token
-           Else, create a new user record with their facebook profile and the new long lived token
-        5. Generate a localToken and put as key in Redis Cache with value as their user ID
-        6. Return this localToken
-    */
+    const facebookAccessToken = req.query.facebookAccessToken
+    const extendTokenPromise = this.facebookClient.extendFacebookAccessToken(facebookAccessToken)
+    const getProfilePromise = extendTokenPromise.then(newFacebookAccessToken =>
+      this.facebookClient.getProfile(newFacebookAccessToken))
+    Promise.all([extendTokenPromise, getProfilePromise]).then(([newFacebookAccessToken, facebookProfile]) => {
+      let user = users.find(user => user.facebookId === facebookProfile.facebookId)
+      if (!user) {
+        user = {
+          id: '',
+          firstName: facebookProfile.firstName,
+          lastName: facebookProfile.lastName,
+          facebookId: facebookProfile.facebookId,
+          facebookAccessToken: newFacebookAccessToken,
+        }
+        users.push(user)
+      } else {
+        user.facebookAccessToken = newFacebookAccessToken
+      }
+      const localToken = crypto.randomBytes(20).toString('hex')
+      this.redisClient.set(localToken, user.id)
+      res.json({ token: localToken })
+      return saveUsers(users)
+    })
+    .then(writePath => {
+      this.logger(`Users updated. Written to: ` +
+        `${path.relative(path.join(__dirname, '..', '..'), writePath)}`)
+    })
+    .catch((error) => {
+      res.json({ error: 'Facebook Login Error: ' + error })
+    })
   }
 }

@@ -5,7 +5,7 @@ import fs from 'fs'
 
 import type { Produce } from './types'
 
-export default function saveInventory(inventory: Array<Produce>): Promise<string> {
+export function saveInventory(inventory: Array<Produce>): Promise<string> {
   let outpath = path.join(__dirname, '..', '..', 'data', 'produce.json')
   return new Promise((resolve, reject) => {
     if (process.env.NODE_ENV !== 'test') {
@@ -16,7 +16,20 @@ export default function saveInventory(inventory: Array<Produce>): Promise<string
   })
 }
 
-export function genId(prod: Produce, inv: Array<Produce>): number {
+export function saveUsers(users: Array<any>): Promise<string> {
+  let outpath = path.join(__dirname, '..', '..', 'data', 'users.json')
+  return new Promise((resolve, reject) => {
+    if (process.env.NODE_ENV !== 'test') {
+      fs.writeFile(outpath, JSON.stringify(users, null, '\t'), err =>
+        err
+        ? reject('Save users error: ' + (err.description ? err.description : ''))
+        : resolve(outpath)
+      )
+    }
+  })
+}
+
+export function genProduceId(prod: Produce, inv: Array<Produce>): number {
   if (typeof inv[0].id === 'undefined') {
     return 1
   }

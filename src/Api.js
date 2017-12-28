@@ -64,7 +64,7 @@ export default class Api {
   initRoutes(): void {
     const produceRouter = new ProduceRouter(this.logger)
     this.express.use(produceRouter.path, produceRouter.router)
-    const loginRouter = new LoginRouter(this.logger)
+    const loginRouter = new LoginRouter(this.redisClient, this.logger)
     this.express.use(loginRouter.path, loginRouter.router)
     const userRouter = new UserRouter(this.logger)
     this.express.use(userRouter.path, userRouter.router)

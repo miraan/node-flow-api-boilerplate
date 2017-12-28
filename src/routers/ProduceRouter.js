@@ -3,7 +3,7 @@
 import inventory from '../../data/produce'
 import { Router } from 'express'
 import path from 'path'
-import saveInventory, { genId } from '../util/save'
+import { saveInventory, genProduceId } from '../util/save'
 import { parseProduce, parseId, parseUpdate } from '../util/parsers'
 
 import type { Debugger } from 'debug'
@@ -52,7 +52,7 @@ export default class ProduceRouter {
   postOne(req: $Request, res: $Response): void {
     if (parseProduce(req.body)) {
       const newProduce = req.body
-      newProduce.id = genId(newProduce, inventory)
+      newProduce.id = genProduceId(newProduce, inventory)
       inventory.push(newProduce)
       res.status(200).json({
         status: 200,
