@@ -46,11 +46,13 @@ export default class Api {
 
   initPassport(): void {
     passport.use(new Strategy((token, cb) => {
+      // $FlowFixMe
       this.redisClient.get(token, (error, value) => {
         if (!value) {
-          return (null, false)
+          return cb(null, false)
         }
-        const user = users[value]
+        const userId = parseInt(value, 10)
+        const user = users.find(user => user.id === userId)
         if (!user) {
           return cb('Authentication Error: No user found for valid token.')
         }

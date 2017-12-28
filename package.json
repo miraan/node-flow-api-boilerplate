@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "DEBUG=\"node-flow-api:*\" nodemon build/index.js",
+    "start": "DEBUG=\"node-flow-api:*\" node build/index.js",
     "test": "jest"
   },
   "author": "",

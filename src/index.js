@@ -16,7 +16,7 @@ declare interface ErrnoError extends Error {
 }
 
 const PROJECT_NAME: string = 'node-flow-api'
-const logger: Debugger = debug(`${PROJECT_NAME}:startup`)
+const logger: Debugger = debug(`${PROJECT_NAME}:`)
 const app: Api = new Api(logger)
 const DEFAULT_PORT: number = 3000
 const port: string | number = normalizePort(process.env.PORT)
