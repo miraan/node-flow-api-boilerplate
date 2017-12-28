@@ -11,8 +11,10 @@
   "license": "ISC",
   "dependencies": {
     "babel-core": "^6.26.0",
+    "babel-plugin-lodash": "^3.3.2",
     "babel-plugin-transform-class-properties": "^6.24.1",
     "babel-plugin-transform-flow-strip-types": "^6.22.0",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-polyfill": "^6.26.0",
     "babel-preset-env": "^1.6.1",
     "body-parser": "^1.18.2",
@@ -24,6 +26,7 @@
     "gulp-babel": "^7.0.0",
     "gulp-flowtype": "^1.0.0",
     "gulp-sourcemaps": "^2.6.2",
+    "lodash": "^4.17.4",
     "morgan": "^1.9.0",
     "passport": "^0.4.0",
     "passport-http-bearer": "^1.0.1",

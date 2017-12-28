@@ -13,5 +13,12 @@ export type User = {
   lastName: string,
   facebookId: string,
   facebookAccessToken: string,
+  email: string,
   level: number,
 }
+
+export type FieldsOnlyInExistingObjects = {
+  id: number,
+}
+
+export type CreateUserPayload = $Diff<User, FieldsOnlyInExistingObjects>
