@@ -1,6 +1,6 @@
 // @flow
 
-import type { CreateUserPayload } from './types'
+import type { CreateUserPayload, UpdateUserPayload } from './types'
 import _ from 'lodash'
 
 export function parseProduce(input: any): boolean {
@@ -38,7 +38,7 @@ export function parseCreateUserPayload(input: any): ?CreateUserPayload {
     facebookId: 'facebookId',
     facebookAccessToken: 'facebookAccessToken',
     level: 1,
-    email: 'email',
+    email: 'email'
   }
   console.log(input)
   if (_.difference(_.keys(requiredKeys), _.keys(input)).length > 0) {
@@ -52,4 +52,25 @@ export function parseCreateUserPayload(input: any): ?CreateUserPayload {
     level: input.level,
     email: input.email,
   }
+}
+
+export function parseUpdateUserPayload(input: any): ?UpdateUserPayload {
+  let payload: UpdateUserPayload = {}
+  const possibleKeys: CreateUserPayload = {
+    firstName: 'firstName',
+    lastName: 'lastName',
+    facebookId: 'facebookId',
+    facebookAccessToken: 'facebookAccessToken',
+    level: 1,
+    email: 'email'
+  }
+  _.keys(possibleKeys).forEach((key, index) => {
+    if (input[key]) {
+      payload[key] = input[key]
+    }
+  })
+  if (_.keys(payload).length < 1) {
+    return null
+  }
+  return payload
 }

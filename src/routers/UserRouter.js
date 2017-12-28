@@ -3,13 +3,14 @@
 import { Router } from 'express'
 import passport from 'passport'
 import path from 'path'
+import _ from 'lodash'
 import users from '../../data/users'
 import passportBearerAuthenticated from '../util/passportBearerAuthenticated'
-import { parseCreateUserPayload } from '../util/parsers'
+import { parseCreateUserPayload, parseUpdateUserPayload } from '../util/parsers'
 import { saveUsers, genUserId } from '../util/save'
 
 import type { Debugger } from 'debug'
-import type { User, CreateUserPayload } from '../util/types'
+import type { User, CreateUserPayload, UpdateUserPayload } from '../util/types'
 
 export default class UserRouter {
   router: Router
@@ -28,6 +29,7 @@ export default class UserRouter {
     this.router.get('/', passportBearerAuthenticated, this.getAll)
     this.router.get('/:id', passportBearerAuthenticated, this.getById)
     this.router.post('/', passportBearerAuthenticated, this.postOne)
+    this.router.put('/:id', passportBearerAuthenticated, this.updateOneById)
   }
 
   getProfile = (req: $Request, res: $Response) => {
@@ -66,7 +68,7 @@ export default class UserRouter {
       })
       return
     }
-    const record = users.find(item => item.id === id)
+    const record: User = users.find(item => item.id === id)
     if (record) {
       res.status(200).json({
         success: true,
@@ -108,6 +110,58 @@ export default class UserRouter {
       success: true,
       content: {
         user: newUser
+      }
+    })
+    saveUsers(users)
+    .then(writePath => {
+      this.logger(`Users updated. Written to:\n\t` +
+        `${path.relative(path.join(__dirname, '..', '..'), writePath)}`)
+    })
+    .catch(err => {
+      this.logger('Error writing to users file.')
+      this.logger(err.stack)
+    })
+  }
+
+  updateOneById = (req: $Request, res: $Response) => {
+    const user: User = req.user
+    const id = parseInt(req.params.id, 10)
+    if (user.id !== id && (!user.level || user.level < 2)) {
+      res.status(401).json({
+        success: false,
+        errorMessage: 'Unauthorized.'
+      })
+      return
+    }
+    const record: User = users.find(item => item.id === id)
+    if (!record) {
+      res.status(400).json({
+        success: false,
+        errorMessage: 'No user with that ID exists.'
+      })
+      return
+    }
+    const payload: ?UpdateUserPayload = parseUpdateUserPayload(req.body)
+    if (!payload) {
+      res.status(400).json({
+        success: false,
+        errorMessage: 'Invalid update user payload.'
+      })
+      return
+    }
+    const newData: CreateUserPayload = {
+      firstName: payload.firstName || record.firstName,
+      lastName: payload.lastName || record.lastName,
+      facebookId: payload.facebookId || record.facebookId,
+      facebookAccessToken: payload.facebookAccessToken || record.facebookAccessToken,
+      email: payload.email || record.email,
+      level: payload.level || record.level,
+    }
+    Object.assign(record, newData)
+    res.status(200).json({
+      success: true,
+      content: {
+        user: record
       }
     })
     saveUsers(users)

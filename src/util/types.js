@@ -22,3 +22,9 @@ export type FieldsOnlyInExistingObjects = {
 }
 
 export type CreateUserPayload = $Diff<User, FieldsOnlyInExistingObjects>
+
+type ToOptionalType = <V>(V) => ?V
+
+export type UpdateUserPayload = {
+  ...$ObjMap<CreateUserPayload, ToOptionalType>,
+}
