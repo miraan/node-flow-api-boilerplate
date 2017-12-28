@@ -13,4 +13,5 @@ export type User = {
   lastName: string,
   facebookId: string,
   facebookAccessToken: string,
+  level: number,
 }

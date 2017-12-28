@@ -34,7 +34,10 @@ export default class LoginRouter {
   facebookLogin = (req: $Request, res: $Response) => {
     const facebookAccessToken = req.query.facebookAccessToken
     if (!facebookAccessToken) {
-      res.json({ error: 'Facebook Access Token Required.' })
+      res.status(200).json({
+        success: false,
+        errorMessage: 'Facebook Access Token Required.'
+      })
       return
     }
     const extendTokenPromise = this.facebookClient.extendFacebookAccessToken(facebookAccessToken)
@@ -51,6 +54,7 @@ export default class LoginRouter {
           lastName: facebookProfile.lastName,
           facebookId: facebookProfile.facebookId,
           email: facebookProfile.email,
+          level: 1,
           facebookAccessToken: newFacebookAccessToken,
         }
         users.push(user)
@@ -59,7 +63,12 @@ export default class LoginRouter {
       }
       const localToken = crypto.randomBytes(20).toString('hex')
       this.redisClient.set(localToken, user.id)
-      res.json({ token: localToken })
+      res.status(200).json({
+        success: true,
+        content: {
+          token: localToken
+        }
+      })
       return saveUsers(users)
     })
     .then(writePath => {
@@ -67,7 +76,10 @@ export default class LoginRouter {
         `${path.relative(path.join(__dirname, '..', '..'), writePath)}`)
     })
     .catch((error) => {
-      res.json({ error: 'Facebook Login Error: ' + error })
+      res.status(200).json({
+        success: false,
+        errorMessage: 'Facebook Login Error: ' + error
+      })
     })
   }
 }
