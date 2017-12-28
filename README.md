@@ -1,4 +1,9 @@
-# node-flow-api-boilerplate
+# node-flow-crud-api
+
+This branch contains a basic Node.JS Express Server with Flow type-checking
+exposing a RESTful API with a basic CRUD example.
+
+Stack used: Node.JS, Express, Flow, Babel + ES Preset, Gulp
 
 ## Prerequisites
 
