@@ -29,13 +29,13 @@ export default class Api {
     this.initRoutes()
   }
 
-  initMiddleware(): void {
+  initMiddleware = () => {
     this.express.use(morgan('dev'))
     this.express.use(bodyParser.json())
     this.express.use(bodyParser.urlencoded({ extended: false }))
   }
 
-  initRedisClient(): void {
+  initRedisClient = () => {
     const port = 6379
     const host = '127.0.0.1'
     this.redisClient = redis.createClient(port, host)
@@ -44,7 +44,7 @@ export default class Api {
       this.logger(`Redis Client Error Event ${error}`))
   }
 
-  initPassport(): void {
+  initPassport = () => {
     passport.use(new Strategy((token, cb) => {
       // $FlowFixMe
       this.redisClient.get(token, (error, value) => {
@@ -61,7 +61,7 @@ export default class Api {
     }))
   }
 
-  initRoutes(): void {
+  initRoutes = () => {
     const produceRouter = new ProduceRouter(this.logger)
     this.express.use(produceRouter.path, produceRouter.router)
     const loginRouter = new LoginRouter(this.redisClient, this.logger)

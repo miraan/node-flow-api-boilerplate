@@ -50,7 +50,6 @@ export default class ProduceRouter {
   }
 
   postOne = (req: $Request, res: $Response) => {
-    console.log(this)
     if (parseProduce(req.body)) {
       const newProduce = req.body
       newProduce.id = genProduceId(inventory)

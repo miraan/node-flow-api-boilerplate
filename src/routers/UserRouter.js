@@ -17,11 +17,11 @@ export default class UserRouter {
     this.init()
   }
 
-  init(): void {
+  init = () => {
     this.router.get('/me', passport.authenticate('bearer', { session: false }), this.getProfile)
   }
 
-  getProfile(req: $Request, res: $Response): void {
+  getProfile = (req: $Request, res: $Response) => {
     res.json({ profile: req.user })
   }
 }
