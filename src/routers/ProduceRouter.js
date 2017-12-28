@@ -135,7 +135,7 @@ export default class ProduceRouter {
       res.status(400).json({
         status: 400,
         message: 'No item found with given ID'
-      });
+      })
     }
   }
 }

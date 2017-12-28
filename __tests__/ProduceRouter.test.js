@@ -38,7 +38,7 @@ describe('Node Flow API', () => {
       .expect(200)
       .then(res => {
         const reqKeys = ['id', 'name', 'price', 'quantity']
-        const { item } = res.body;
+        const { item } = res.body
         reqKeys.forEach(key => expect(Object.keys(item)).toContain(key))
         expect(typeof item.id).toBe('number')
         expect(typeof item.name).toBe('string')

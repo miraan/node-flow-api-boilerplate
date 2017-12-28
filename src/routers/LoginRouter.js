@@ -9,6 +9,7 @@ import { saveUsers, genUserId } from '../util/save'
 
 import type { Debugger } from 'debug'
 import type { RedisClient } from 'redis'
+import type { User } from '../util/types'
 
 export default class LoginRouter {
   router: Router
@@ -42,7 +43,7 @@ export default class LoginRouter {
     })
     Promise.all([extendTokenPromise, getProfilePromise])
     .then(([newFacebookAccessToken, facebookProfile]) => {
-      let user = users.find(user => user.facebookId === facebookProfile.facebookId)
+      let user: User = users.find(user => user.facebookId === facebookProfile.facebookId)
       if (!user) {
         user = {
           id: genUserId(users),

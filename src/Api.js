@@ -29,12 +29,6 @@ export default class Api {
     this.initRoutes()
   }
 
-  initMiddleware = () => {
-    this.express.use(morgan('dev'))
-    this.express.use(bodyParser.json())
-    this.express.use(bodyParser.urlencoded({ extended: false }))
-  }
-
   initRedisClient = () => {
     const port = 6379
     const host = '127.0.0.1'
@@ -42,6 +36,12 @@ export default class Api {
     this.redisClient.on('connect', () => this.logger('Redis Client Connected'))
     this.redisClient.on('error', error =>
       this.logger(`Redis Client Error Event ${error}`))
+  }
+
+  initMiddleware = () => {
+    this.express.use(morgan('dev'))
+    this.express.use(bodyParser.json())
+    this.express.use(bodyParser.urlencoded({ extended: false }))
   }
 
   initPassport = () => {
