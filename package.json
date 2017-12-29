@@ -33,12 +33,13 @@
     "redis": "^2.8.0"
   },
   "devDependencies": {
+    "babel-jest": "^22.0.4",
     "jest": "^22.0.4",
     "supertest": "^3.0.0"
   },
   "jest": {
     "transform": {
-      ".*": "<rootDir>/node_modules/babel-jest"
+      ".*": "babel-jest"
     }
   }
 }

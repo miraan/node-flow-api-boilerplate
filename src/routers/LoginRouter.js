@@ -4,26 +4,25 @@ import { Router } from 'express'
 import FacebookClient from '../util/FacebookClient'
 import crypto from 'crypto'
 import path from 'path'
-import ServerConfigurationObject from '../configuration'
+import TokenStore from '../util/TokenStore'
 import users from '../../data/users'
 import { saveItems, genId } from '../util/save'
 
 import type { Debugger } from 'debug'
-import type { RedisClient } from 'redis'
 import type { User } from '../util/types'
 
 export default class LoginRouter {
   router: Router
   path: string
   logger: Debugger
-  redisClient: RedisClient
+  tokenStore: TokenStore
   facebookClient: FacebookClient
 
-  constructor(redisClient: RedisClient, logger: Debugger, path: string = '/api/v1/login') {
+  constructor(tokenStore: TokenStore, logger: Debugger, path: string = '/api/v1/login') {
     this.router = Router()
     this.path = path
     this.logger = logger
-    this.redisClient = redisClient
+    this.tokenStore = tokenStore
     this.facebookClient = new FacebookClient()
     this.init()
   }
@@ -63,8 +62,7 @@ export default class LoginRouter {
         user.facebookAccessToken = newFacebookAccessToken
       }
       const localToken = crypto.randomBytes(20).toString('hex')
-      // $FlowFixMe
-      this.redisClient.set(localToken, user.id, 'EX', ServerConfigurationObject.redisTokenExpireTimeSeconds)
+      this.tokenStore.setToken(localToken, user.id)
       res.status(200).json({
         success: true,
         content: {

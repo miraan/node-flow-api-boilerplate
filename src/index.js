@@ -4,8 +4,9 @@
 
 import * as http from 'http'
 import debug from 'debug'
-import Api from './Api'
 import ServerConfigurationObject from './configuration'
+import TokenStore from './util/TokenStore'
+import Api from './Api'
 
 import type { Debugger } from 'debug'
 
@@ -16,9 +17,9 @@ declare interface ErrnoError extends Error {
   syscall?: string,
 }
 
-const PROJECT_NAME: string = 'node-flow-api'
-const logger: Debugger = debug(`${PROJECT_NAME}:`)
-const app: Api = new Api(logger)
+const logger: Debugger = debug(ServerConfigurationObject.loggerPrefix + ':')
+const tokenStore: TokenStore = new TokenStore(logger)
+const app: Api = new Api(logger, tokenStore)
 const port: string | number = normalizePort(process.env.PORT)
 const server: Server = http.createServer(app.express)
 

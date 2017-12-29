@@ -47,9 +47,10 @@ export type UpdateTripPayload = {
 
 export type ServerConfiguration = {
   defaultPort: number,
+  loggerPrefix: string,
+  tokenExpireTimeSeconds: number,
   redisServerHost: string,
   redisServerPort: number,
-  redisTokenExpireTimeSeconds: number,
   facebookClientAppId: string,
   facebookClientAppSecret: string,
 }

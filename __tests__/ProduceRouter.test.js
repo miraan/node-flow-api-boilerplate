@@ -1,7 +1,11 @@
 import request from 'supertest'
 import Api from '../src/Api'
+import debug from 'debug'
 
-const app = new Api().express
+import type { Debugger } from 'debug'
+
+const logger: Debugger = debug('jest-logger:')
+const app: Api = new Api(logger).express
 
 describe('Node Flow API', () => {
 

@@ -5,9 +5,8 @@ import morgan from 'morgan'
 import bodyParser from 'body-parser'
 import passport from 'passport'
 import { Strategy } from 'passport-http-bearer'
-import ServerConfigurationObject from './configuration'
+import TokenStore from './util/TokenStore'
 import users from '../data/users'
-import redis from 'redis'
 
 import ProduceRouter from './routers/ProduceRouter'
 import LoginRouter from './routers/LoginRouter'
@@ -15,29 +14,19 @@ import UserRouter from './routers/UserRouter'
 import TripRouter from './routers/TripRouter'
 
 import type { Debugger } from 'debug'
-import type { RedisClient } from 'redis'
 
 export default class Api {
   express: express$Application
   logger: Debugger
-  redisClient: RedisClient
+  tokenStore: TokenStore
 
-  constructor(logger: Debugger) {
+  constructor(logger: Debugger, tokenStore: TokenStore) {
     this.express = express()
     this.logger = logger
-    this.initRedisClient()
+    this.tokenStore = tokenStore
     this.initMiddleware()
     this.initPassport()
     this.initRoutes()
-  }
-
-  initRedisClient = () => {
-    this.redisClient = redis.createClient(
-      ServerConfigurationObject.redisServerPort,
-      ServerConfigurationObject.redisServerHost)
-    this.redisClient.on('connect', () => this.logger('Redis Client Connected'))
-    this.redisClient.on('error', error =>
-      this.logger(`Redis Client Error Event ${error}`))
   }
 
   initMiddleware = () => {
@@ -48,17 +37,18 @@ export default class Api {
 
   initPassport = () => {
     passport.use(new Strategy((token, cb) => {
-      // $FlowFixMe
-      this.redisClient.get(token, (error, value) => {
-        if (!value) {
+      this.tokenStore.getUserId(token).then(userId => {
+        if (!userId) {
           return cb(null, false)
         }
-        const userId = parseInt(value, 10)
         const user = users.find(user => user.id === userId)
         if (!user) {
           return cb('Authentication Error: No user found for valid token.')
         }
         return cb(null, user)
+      })
+      .catch(error => {
+        return cb('Token Store Get Error: ' + error)
       })
     }))
   }
@@ -66,7 +56,7 @@ export default class Api {
   initRoutes = () => {
     const produceRouter = new ProduceRouter(this.logger)
     this.express.use(produceRouter.path, produceRouter.router)
-    const loginRouter = new LoginRouter(this.redisClient, this.logger)
+    const loginRouter = new LoginRouter(this.tokenStore, this.logger)
     this.express.use(loginRouter.path, loginRouter.router)
     const userRouter = new UserRouter(this.logger)
     this.express.use(userRouter.path, userRouter.router)
