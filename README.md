@@ -14,9 +14,9 @@ Client SDK.
 
 The server extends this token to a long lived token, gets the associated Facebook
 profile and creates a User object with this data or updates the User object if
-one already exists with an associated Facebook User ID.
+one already exists with the retrieved Facebook profile user ID.
 
-Once this log in process completes, the server generates a random hex string,
+Once this login process completes, the server generates a random hex string,
 stores it in Redis with the User ID, and returns it as a token to the client to
 use on future requests.
 
@@ -25,8 +25,34 @@ Future client requests can be authenticated if the client passes this token in t
 
 `Authorization: Bearer xxxxx`
 
+Each user has an associated `level` which governs their permissions to perform
+certain actions.
+
+Level 1 users can only view and change their own records.
+
+Level 2 users can view all records, but only change records of level 1 users.
+
+Level 3 users can view and change all records.
+
 Stack used: Node.JS, Express, Flow, Babel + ES Preset, Gulp,
 Passport (Bearer Token Strategy), Facebook Node SDK (fb), Redis
+
+## All routes
+
+`GET /api/v1/login/facebook?facebookAccessToken=xxxxx`: Authenticates and returns a token.
+
+`GET /api/v1/user/me`: Returns own profile.
+
+`GET /api/v1/user/`: Returns all users.
+
+`GET /api/v1/user/xxx`: Returns user with ID `xxx`
+
+`POST /api/v1/user/`: Creates a user with JSON data in request body. All user fields
+must be present.
+
+`PUT /api/v1/user/xxx`: Updates user with ID `xxx` with JSON data in request body
+
+`DELETE /api/v1/user/xxx`: Deletes a user with ID `xxx`
 
 ## Prerequisites
 
