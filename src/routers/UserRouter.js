@@ -134,6 +134,13 @@ export default class UserRouter {
       })
       return
     }
+    if (record.level >= user.level) {
+      res.status(401).json({
+        success: false,
+        errorMessage: 'Unauthorized.'
+      })
+      return
+    }
     const payload: ?UpdateUserPayload = parseUpdateUserPayload(req.body)
     if (!payload) {
       res.status(400).json({
@@ -175,6 +182,14 @@ export default class UserRouter {
       res.status(400).json({
         success: false,
         errorMessage: 'No user with that ID exists.'
+      })
+      return
+    }
+    const record: User = users[recordIndex]
+    if (record.level >= user.level) {
+      res.status(401).json({
+        success: false,
+        errorMessage: 'Unauthorized.'
       })
       return
     }
