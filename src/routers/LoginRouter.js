@@ -4,6 +4,7 @@ import { Router } from 'express'
 import FacebookClient from '../util/FacebookClient'
 import crypto from 'crypto'
 import path from 'path'
+import ServerConfigurationObject from '../configuration'
 import users from '../../data/users'
 import { saveItems, genId } from '../util/save'
 
@@ -62,7 +63,8 @@ export default class LoginRouter {
         user.facebookAccessToken = newFacebookAccessToken
       }
       const localToken = crypto.randomBytes(20).toString('hex')
-      this.redisClient.set(localToken, user.id)
+      // $FlowFixMe
+      this.redisClient.set(localToken, user.id, 'EX', ServerConfigurationObject.redisTokenExpireTimeSeconds)
       res.status(200).json({
         success: true,
         content: {

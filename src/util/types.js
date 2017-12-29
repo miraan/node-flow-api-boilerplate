@@ -44,3 +44,12 @@ export type CreateTripPayload = $Diff<Trip, {
 export type UpdateTripPayload = {
   ...$ObjMap<CreateTripPayload, ToOptionalType>,
 }
+
+export type ServerConfiguration = {
+  defaultPort: number,
+  redisServerHost: string,
+  redisServerPort: number,
+  redisTokenExpireTimeSeconds: number,
+  facebookClientAppId: string,
+  facebookClientAppSecret: string,
+}

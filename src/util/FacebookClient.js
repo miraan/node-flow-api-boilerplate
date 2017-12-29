@@ -1,7 +1,7 @@
 // @flow
 
 import FB from 'fb'
-import { FACEBOOK_CLIENT_APP_ID, FACEBOOK_CLIENT_APP_SECRET_ID } from '../constants'
+import ServerConfigurationObject from '../configuration'
 
 type FacebookProfile = {
   facebookId: string,
@@ -14,8 +14,8 @@ export default class FacebookClient {
   extendFacebookAccessToken(facebookAccessToken: string): Promise<string> {
     return new Promise((resolve, reject) => {
       FB.api('oauth/access_token', {
-        client_id: FACEBOOK_CLIENT_APP_ID,
-        client_secret: FACEBOOK_CLIENT_APP_SECRET_ID,
+        client_id: ServerConfigurationObject.facebookClientAppId,
+        client_secret: ServerConfigurationObject.facebookClientAppSecret,
         grant_type: 'fb_exchange_token',
         fb_exchange_token: facebookAccessToken,
       }, res => {

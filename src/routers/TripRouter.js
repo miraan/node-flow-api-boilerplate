@@ -16,7 +16,7 @@ export default class TripRouter {
   path: string
   logger: Debugger
 
-  constructor(logger: Debugger, path: string = '/api/v1/user') {
+  constructor(logger: Debugger, path: string = '/api/v1/trip') {
     this.router = Router()
     this.path = path
     this.logger = logger

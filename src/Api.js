@@ -5,12 +5,14 @@ import morgan from 'morgan'
 import bodyParser from 'body-parser'
 import passport from 'passport'
 import { Strategy } from 'passport-http-bearer'
+import ServerConfigurationObject from './configuration'
 import users from '../data/users'
 import redis from 'redis'
 
 import ProduceRouter from './routers/ProduceRouter'
 import LoginRouter from './routers/LoginRouter'
 import UserRouter from './routers/UserRouter'
+import TripRouter from './routers/TripRouter'
 
 import type { Debugger } from 'debug'
 import type { RedisClient } from 'redis'
@@ -30,9 +32,9 @@ export default class Api {
   }
 
   initRedisClient = () => {
-    const port = 6379
-    const host = '127.0.0.1'
-    this.redisClient = redis.createClient(port, host)
+    this.redisClient = redis.createClient(
+      ServerConfigurationObject.redisServerPort,
+      ServerConfigurationObject.redisServerHost)
     this.redisClient.on('connect', () => this.logger('Redis Client Connected'))
     this.redisClient.on('error', error =>
       this.logger(`Redis Client Error Event ${error}`))
@@ -68,5 +70,7 @@ export default class Api {
     this.express.use(loginRouter.path, loginRouter.router)
     const userRouter = new UserRouter(this.logger)
     this.express.use(userRouter.path, userRouter.router)
+    const tripRouter = new TripRouter(this.logger)
+    this.express.use(tripRouter.path, tripRouter.router)
   }
 }
