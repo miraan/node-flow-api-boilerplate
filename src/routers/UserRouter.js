@@ -149,15 +149,8 @@ export default class UserRouter {
       })
       return
     }
-    const newData: CreateUserPayload = {
-      firstName: payload.firstName || record.firstName,
-      lastName: payload.lastName || record.lastName,
-      facebookId: payload.facebookId || record.facebookId,
-      facebookAccessToken: payload.facebookAccessToken || record.facebookAccessToken,
-      email: payload.email || record.email,
-      level: payload.level || record.level,
-    }
-    Object.assign(record, newData)
+    // $FlowFixMe
+    Object.assign(record, payload)
     res.status(200).json({
       success: true,
       content: {
