@@ -2,6 +2,7 @@
 
 import path from 'path'
 import fs from 'fs'
+import _ from 'lodash'
 
 import type { Produce } from './types'
 
@@ -11,19 +12,6 @@ export function saveInventory(inventory: Array<Produce>): Promise<string> {
     if (process.env.NODE_ENV !== 'test') {
       fs.writeFile(outpath, JSON.stringify(inventory, null, '\t'), err =>
         (err) ? reject(err) : resolve(outpath)
-      )
-    }
-  })
-}
-
-export function saveUsers(users: Array<any>): Promise<string> {
-  let outpath = path.join(__dirname, '..', '..', 'data', 'users.json')
-  return new Promise((resolve, reject) => {
-    if (process.env.NODE_ENV !== 'test') {
-      fs.writeFile(outpath, JSON.stringify(users, null, '\t'), err =>
-        err
-        ? reject('Save users error: ' + (err.description ? err.description : ''))
-        : resolve(outpath)
       )
     }
   })
@@ -40,13 +28,22 @@ export function genProduceId(inv: Array<Produce>): number {
   return maxId + 1
 }
 
-export function genUserId(users: Array<any>): number {
-  if (typeof users[0].id === 'undefined') {
+export function saveItems(items: Array<any>, file: string): Promise<string> {
+  let outpath = path.join(__dirname, '..', '..', 'data', file)
+  return new Promise((resolve, reject) => {
+    if (process.env.NODE_ENV !== 'test') {
+      fs.writeFile(outpath, JSON.stringify(items, null, '\t'), err =>
+        err
+        ? reject('Save items error: ' + (err.description || ''))
+        : resolve(outpath)
+      )
+    }
+  })
+}
+
+export function genId(items: Array<any>): number {
+  if (items.length < 1) {
     return 1
   }
-  let maxId: number = users[0].id
-  users.slice(1).forEach(item => {
-    if (item.id && item.id > maxId) maxId = item.id
-  })
-  return maxId + 1
+  return parseInt(_.maxBy(items, 'id'), 10) + 1
 }

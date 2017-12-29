@@ -1,5 +1,7 @@
 // @flow
 
+type ToOptionalType = <V>(V) => ?V
+
 export type Produce = {
   id: number,
   name: string,
@@ -17,14 +19,28 @@ export type User = {
   level: number,
 }
 
-export type FieldsOnlyInExistingObjects = {
+export type CreateUserPayload = $Diff<User, {
   id: number,
-}
-
-export type CreateUserPayload = $Diff<User, FieldsOnlyInExistingObjects>
-
-type ToOptionalType = <V>(V) => ?V
+}>
 
 export type UpdateUserPayload = {
   ...$ObjMap<CreateUserPayload, ToOptionalType>,
+}
+
+export type Trip = {
+  id: number,
+  userId: number,
+  destination: string,
+  startDate: string,
+  endDate: string,
+  comment: string,
+}
+
+export type CreateTripPayload = $Diff<Trip, {
+  id: number,
+  userId: number,
+}>
+
+export type UpdateTripPayload = {
+  ...$ObjMap<CreateTripPayload, ToOptionalType>,
 }

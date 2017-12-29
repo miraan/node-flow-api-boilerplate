@@ -3,15 +3,15 @@
 import { Router } from 'express'
 import path from 'path'
 import _ from 'lodash'
-import users from '../../data/users'
+import trips from '../../data/trips'
 import passportBearerAuthenticated from '../util/passportBearerAuthenticated'
-import { parseCreateUserPayload, parseUpdateUserPayload } from '../util/parsers'
+import { parseCreateTripPayload, parseUpdateTripPayload } from '../util/parsers'
 import { saveItems, genId } from '../util/save'
 
 import type { Debugger } from 'debug'
-import type { User, CreateUserPayload, UpdateUserPayload } from '../util/types'
+import type { User, Trip, CreateTripPayload, UpdateTripPayload } from '../util/types'
 
-export default class UserRouter {
+export default class TripRouter {
   router: Router
   path: string
   logger: Debugger
@@ -24,7 +24,7 @@ export default class UserRouter {
   }
 
   init = () => {
-    this.router.get('/me', passportBearerAuthenticated, this.getProfile)
+    this.router.get('/me', passportBearerAuthenticated, this.getOwn)
     this.router.get('/', passportBearerAuthenticated, this.getAll)
     this.router.get('/:id', passportBearerAuthenticated, this.getById)
     this.router.post('/', passportBearerAuthenticated, this.postOne)
@@ -32,18 +32,20 @@ export default class UserRouter {
     this.router.delete('/:id', passportBearerAuthenticated, this.removeById)
   }
 
-  getProfile = (req: $Request, res: $Response) => {
+  getOwn = (req: $Request, res: $Response) => {
+    const user: User = req.user
+    const ownTrips: Array<Trip> = _.filter(trips, trip => trip.userId === user.id)
     res.status(200).json({
       success: true,
       content: {
-        user: req.user
+        trips: ownTrips
       }
     })
   }
 
   getAll = (req: $Request, res: $Response) => {
     const user: User = req.user
-    if (!user.level || user.level < 2) {
+    if (!user.level || user.level < 3) {
       res.status(401).json({
         success: false,
         errorMessage: 'Unauthorized.'
@@ -53,7 +55,7 @@ export default class UserRouter {
     res.status(200).json({
       success: true,
       content: {
-        users: users
+        trips: trips
       }
     })
   }
@@ -61,148 +63,128 @@ export default class UserRouter {
   getById = (req: $Request, res: $Response) => {
     const user: User = req.user
     const id = parseInt(req.params.id, 10)
-    if (user.id !== id && (!user.level || user.level < 2)) {
+    const trip: Trip = trips.find(trip => trip.id === id)
+    if (!trip) {
+      res.status(400).json({
+        success: false,
+        errorMessage: 'No trip with that ID exists.'
+      })
+      return
+    }
+    if (user.id !== trip.userId && (!user.level || user.level < 3)) {
       res.status(401).json({
         success: false,
         errorMessage: 'Unauthorized.'
       })
       return
     }
-    const record: User = users.find(item => item.id === id)
-    if (record) {
-      res.status(200).json({
-        success: true,
-        content: {
-          user: record
-        }
-      })
-    } else {
-      res.status(400).json({
-        success: false,
-        errorMessage: 'No user with that ID exists.'
-      })
-    }
+    res.status(200).json({
+      success: true,
+      content: {
+        trip: trip
+      }
+    })
   }
 
   postOne = (req: $Request, res: $Response) => {
     const user: User = req.user
-    if (!user.level || user.level < 2) {
-      res.status(401).json({
-        success: false,
-        errorMessage: 'Unauthorized.'
-      })
-      return
-    }
-    const payload: ?CreateUserPayload = parseCreateUserPayload(req.body)
+    const payload: ?CreateTripPayload = parseCreateTripPayload(req.body)
     if (!payload) {
       res.status(400).json({
         success: false,
-        errorMessage: 'Invalid create user payload.'
+        errorMessage: 'Invalid create trip payload.'
       })
       return
     }
-    const newUser: User = {
+    const newTrip: Trip = {
       ...payload,
-      id: genId(users)
+      id: genId(trips),
+      userId: user.id,
     }
-    users.push(newUser)
+    trips.push(newTrip)
     res.status(200).json({
       success: true,
       content: {
-        user: newUser
+        trip: newTrip
       }
     })
-    this.saveUsersFile()
+    this.saveTripsFile()
   }
 
   updateById = (req: $Request, res: $Response) => {
     const user: User = req.user
     const id = parseInt(req.params.id, 10)
-    if (user.id !== id && (!user.level || user.level < 2)) {
-      res.status(401).json({
-        success: false,
-        errorMessage: 'Unauthorized.'
-      })
-      return
-    }
-    const record: User = users.find(item => item.id === id)
-    if (!record) {
+    const trip: Trip = trips.find(trip => trip.id === id)
+    if (!trip) {
       res.status(400).json({
         success: false,
-        errorMessage: 'No user with that ID exists.'
+        errorMessage: 'No trip with that ID exists.'
       })
       return
     }
-    if (record.level >= user.level) {
+    if (user.id !== trip.userId && (!user.level || user.level < 3)) {
       res.status(401).json({
         success: false,
         errorMessage: 'Unauthorized.'
       })
       return
     }
-    const payload: ?UpdateUserPayload = parseUpdateUserPayload(req.body)
+    const payload: ?UpdateTripPayload = parseUpdateTripPayload(req.body)
     if (!payload) {
       res.status(400).json({
         success: false,
-        errorMessage: 'Invalid update user payload.'
+        errorMessage: 'Invalid update trip payload.'
       })
       return
     }
     // $FlowFixMe
-    Object.assign(record, payload)
+    Object.assign(trip, payload)
     res.status(200).json({
       success: true,
       content: {
-        user: record
+        trip: trip
       }
     })
-    this.saveUsersFile()
+    this.saveTripsFile()
   }
 
   removeById = (req: $Request, res: $Response) => {
     const user: User = req.user
     const id = parseInt(req.params.id, 10)
-    if (user.id !== id && (!user.level || user.level < 2)) {
-      res.status(401).json({
-        success: false,
-        errorMessage: 'Unauthorized.'
-      })
-      return
-    }
-    const recordIndex: number = users.findIndex(item => item.id === id)
-    if (recordIndex === -1) {
+    const tripIndex: number = trips.findIndex(trip => trip.id === id)
+    if (tripIndex === -1) {
       res.status(400).json({
         success: false,
-        errorMessage: 'No user with that ID exists.'
+        errorMessage: 'No trip with that ID exists.'
       })
       return
     }
-    const record: User = users[recordIndex]
-    if (record.level >= user.level) {
+    const trip: Trip = trips[tripIndex]
+    if (user.id !== trip.userId && (!user.level || user.level < 3)) {
       res.status(401).json({
         success: false,
         errorMessage: 'Unauthorized.'
       })
       return
     }
-    const deletedRecord = users.splice(recordIndex, 1)[0]
+    const deletedTrip = trips.splice(tripIndex, 1)[0]
     res.status(200).json({
       success: true,
       content: {
-        user: deletedRecord
+        trip: deletedTrip
       }
     })
-    this.saveUsersFile()
+    this.saveTripsFile()
   }
 
-  saveUsersFile = () => {
-    saveItems(users, 'users.json')
+  saveTripsFile = () => {
+    saveItems(trips, 'trips.json')
     .then(writePath => {
-      this.logger(`Users updated. Written to:\n\t` +
+      this.logger(`Trips updated. Written to:\n\t` +
         `${path.relative(path.join(__dirname, '..', '..'), writePath)}`)
     })
     .catch(err => {
-      this.logger('Error writing to users file.')
+      this.logger('Error writing to trips file.')
       this.logger(err.stack)
     })
   }

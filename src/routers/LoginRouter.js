@@ -5,7 +5,7 @@ import FacebookClient from '../util/FacebookClient'
 import crypto from 'crypto'
 import path from 'path'
 import users from '../../data/users'
-import { saveUsers, genUserId } from '../util/save'
+import { saveItems, genId } from '../util/save'
 
 import type { Debugger } from 'debug'
 import type { RedisClient } from 'redis'
@@ -49,7 +49,7 @@ export default class LoginRouter {
       let user: User = users.find(user => user.facebookId === facebookProfile.facebookId)
       if (!user) {
         user = {
-          id: genUserId(users),
+          id: genId(users),
           firstName: facebookProfile.firstName,
           lastName: facebookProfile.lastName,
           facebookId: facebookProfile.facebookId,
@@ -69,7 +69,7 @@ export default class LoginRouter {
           token: localToken
         }
       })
-      return saveUsers(users)
+      return saveItems(users, 'users.json')
     })
     .then(writePath => {
       this.logger(`Users updated. Written to: ` +

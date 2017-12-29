@@ -1,0 +1,18 @@
+[
+  {
+    "id": 1,
+    "userId": 4,
+    "destination": "London",
+    "startDate": "2012-04-23T18:25:43.511Z",
+    "endDate": "2012-04-25T18:25:43.511Z",
+    "comment": "Going to London to see the family!"
+  },
+  {
+    "id": 2,
+    "userId": 3,
+    "destination": "Sofia, Bulgaria",
+    "startDate": "2012-05-23T18:25:43.511Z",
+    "endDate": "2012-07-25T18:25:43.511Z",
+    "comment": "Going to Bulgaria for the mountains!"
+  }
+]
