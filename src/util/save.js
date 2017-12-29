@@ -42,8 +42,9 @@ export function saveItems(items: Array<any>, file: string): Promise<string> {
 }
 
 export function genId(items: Array<any>): number {
-  if (items.length < 1) {
+  const ids: Array<number> = _.map(items, item => item.id)
+  if (ids.length < 1) {
     return 1
   }
-  return parseInt(_.maxBy(items, 'id'), 10) + 1
+  return _.max(ids) + 1
 }
