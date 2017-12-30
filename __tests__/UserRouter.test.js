@@ -11,7 +11,7 @@ import TokenStore from '../src/stores/TokenStore'
 import DataStore from '../src/stores/DataStore'
 
 import type { Debugger } from 'debug'
-import type { User } from '../src/util/types'
+import type { User, CreateUserPayload, UpdateUserPayload } from '../src/util/types'
 
 const mockUserData: Array<User> = [
   {
@@ -253,27 +253,66 @@ describe('User Routes', () => {
 
   describe('POST /api/v1/user/ - create a new user', () => {
 
+    const createUserPayload: CreateUserPayload = {
+      firstName: "Ali",
+      lastName: "Sarraf",
+      facebookId: "123443245",
+      facebookAccessToken: "njr3njrn4j3ngjnx4",
+      email: "ali@sarraf.com",
+      level: 1,
+    }
+
     it('should return JSON', () => {
       return request(app).post('/api/v1/user/')
         .expect('Content-Type', /json/)
         .then(res => expect(res.body).toBeInstanceOf(Object))
     })
 
-    // it('should return 401 if token 1 is used', () => {
-    //
-    // })
-    //
-    // it('should return 400 if token 2 is used with incomplete payload', () => {
-    //
-    // })
-    //
-    // it('should return success if token 2 is used', () => {
-    //
-    // })
-    //
-    // it('should return success if token 3 is used', () => {
-    //
-    // })
+    it('should return 401 if token 1 is used', () => {
+      return request(app).post('/api/v1/user')
+        .set('Authorization', 'Bearer token1')
+        .send(createUserPayload)
+        .expect(401)
+        .then(res => expect(res.body.success).toBe(false))
+    })
+
+    it('should return 400 if token 2 is used with incomplete payload', () => {
+      const incompletePayload = Object.assign({}, createUserPayload)
+      delete incompletePayload.email
+      return request(app).post('/api/v1/user')
+        .set('Authorization', 'Bearer token2')
+        .send(incompletePayload)
+        .expect(400)
+        .then(res => expect(res.body.success).toBe(false))
+    })
+
+    it('should return success and the payload data if token 2 is used', () => {
+      return request(app).post('/api/v1/user')
+        .set('Authorization', 'Bearer token2')
+        .send(createUserPayload)
+        .expect(200)
+        .then(res => {
+          expect(res.body.success).toBe(true)
+          const returnedUser: User = res.body.content.user
+          expect(returnedUser.id).toBeGreaterThan(3)
+          delete returnedUser.id
+          expect(returnedUser).toEqual(createUserPayload)
+        })
+    })
+
+    it('should return success if token 3 is used', () => {
+      return request(app).post('/api/v1/user')
+        .set('Authorization', 'Bearer token3')
+        .send(createUserPayload)
+        .expect(200)
+        .then(res => {
+          expect(res.body.success).toBe(true)
+          const returnedUser: User = res.body.content.user
+          expect(returnedUser.id).toBeGreaterThan(3)
+          delete returnedUser.id
+          expect(returnedUser).toEqual(createUserPayload)
+        })
+    })
 
   })
 

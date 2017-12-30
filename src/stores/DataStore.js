@@ -67,6 +67,7 @@ export default class DataStore {
         reject('DataStore updateUser error: No user found with given userId.')
         return
       }
+      // $FlowFixMe
       Object.assign(user, payload)
       this._saveUsers().then(writePath => {
         resolve(user)
