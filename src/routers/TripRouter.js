@@ -4,7 +4,6 @@ import { Router } from 'express'
 import path from 'path'
 import _ from 'lodash'
 import DataStore from '../stores/DataStore'
-import trips from '../../data/trips'
 import passportBearerAuthenticated from '../util/passportBearerAuthenticated'
 import { parseCreateTripPayload, parseUpdateTripPayload } from '../util/parsers'
 import { saveItems, genId } from '../util/save'
@@ -37,12 +36,20 @@ export default class TripRouter {
 
   getOwn = (req: $Request, res: $Response) => {
     const user: User = req.user
-    const ownTrips: Array<Trip> = _.filter(trips, trip => trip.userId === user.id)
-    res.status(200).json({
-      success: true,
-      content: {
-        trips: ownTrips
-      }
+    this.dataStore.getTripsByUserId(user.id).then(ownTrips => {
+      res.status(200).json({
+        success: true,
+        content: {
+          trips: ownTrips
+        }
+      })
+    })
+    .catch(error => {
+      this.logger('TripRouter getOwn Error: ' + error)
+      res.status(500).json({
+        success: false,
+        errorMessage: 'Error getting trips.'
+      })
     })
   }
 
@@ -55,37 +62,57 @@ export default class TripRouter {
       })
       return
     }
-    res.status(200).json({
-      success: true,
-      content: {
-        trips: trips
-      }
+    this.dataStore.getTrips().then(trips => {
+      res.status(200).json({
+        success: true,
+        content: {
+          trips: trips
+        }
+      })
+    })
+    .catch(error => {
+      this.logger('TripRouter getAll Error: ' + error)
+      res.status(500).json({
+        success: false,
+        errorMessage: 'Error getting trips.'
+      })
     })
   }
 
   getById = (req: $Request, res: $Response) => {
     const user: User = req.user
     const id = parseInt(req.params.id, 10)
-    const trip: Trip = trips.find(trip => trip.id === id)
-    if (!trip) {
-      res.status(400).json({
-        success: false,
-        errorMessage: 'No trip with that ID exists.'
-      })
-      return
-    }
-    if (user.id !== trip.userId && (!user.level || user.level < 3)) {
-      res.status(401).json({
-        success: false,
-        errorMessage: 'Unauthorized.'
-      })
-      return
-    }
-    res.status(200).json({
-      success: true,
-      content: {
-        trip: trip
+    this.dataStore.getTripById(id).then(trip => {
+      if (!trip) {
+        res.status(400).json({
+          success: false,
+          errorMessage: 'No trip with that ID exists.'
+        })
+        return Promise.reject(null)
       }
+      if (user.id !== trip.userId && (!user.level || user.level < 3)) {
+        res.status(401).json({
+          success: false,
+          errorMessage: 'Unauthorized.'
+        })
+        return Promise.reject(null)
+      }
+      res.status(200).json({
+        success: true,
+        content: {
+          trip: trip
+        }
+      })
+    })
+    .catch(error => {
+      if (!error) {
+        return
+      }
+      this.logger('TripRouter getById Error: ' + error)
+      res.status(500).json({
+        success: false,
+        errorMessage: 'Error getting trip.'
+      })
     })
   }
 
