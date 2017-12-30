@@ -43,7 +43,7 @@ export default class Api {
         if (!userId) {
           return cb(null, false)
         }
-        return this.dataStore.getUser(userId)
+        return this.dataStore.getUserById(userId)
       })
       .then(user => {
         if (!user) {
@@ -60,11 +60,14 @@ export default class Api {
   initRoutes = () => {
     const produceRouter = new ProduceRouter(this.logger)
     this.express.use(produceRouter.path, produceRouter.router)
-    const loginRouter = new LoginRouter(this.tokenStore, this.logger)
+
+    const loginRouter = new LoginRouter(this.logger, this.tokenStore, this.dataStore)
     this.express.use(loginRouter.path, loginRouter.router)
-    const userRouter = new UserRouter(this.logger)
+
+    const userRouter = new UserRouter(this.logger, this.dataStore)
     this.express.use(userRouter.path, userRouter.router)
-    const tripRouter = new TripRouter(this.logger)
+
+    const tripRouter = new TripRouter(this.logger, this.dataStore)
     this.express.use(tripRouter.path, tripRouter.router)
   }
 }

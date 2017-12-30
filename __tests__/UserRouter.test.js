@@ -108,9 +108,15 @@ describe('User Routes', () => {
         })
     })
 
-    // it('should return user 2 if token 2 is used', () => {
-    //
-    // })
+    it('should return user 2 if token 2 is used', () => {
+      return request(app).get('/api/v1/user/me')
+        .set('Authorization', 'Bearer token2')
+        .expect(200)
+        .then(res => {
+          expect(res.body.success).toBe(true)
+          expect(res.body.content.user).toEqual(mockUserData[1])
+        })
+    })
 
   })
 
@@ -122,21 +128,32 @@ describe('User Routes', () => {
         .then(res => expect(res.body).toBeInstanceOf(Object))
     })
 
-    // it('should return 401 if no token is used', () => {
-    //
-    // })
-    //
-    // it('should return 401 if token 1 is used', () => {
-    //
-    // })
-    //
-    // it('should return an array of all users if token 2 is used', () => {
-    //
-    // })
-    //
-    // it('should return an array of all users if token 3 is used', () => {
-    //
-    // })
+    it('should return 401 if no token is used', () => {
+      return request(app).get('/api/v1/user/')
+        .expect(401)
+        .then(res => expect(res.body.success).toBe(false))
+    })
+
+    it('should return 401 if token 1 is used', () => {
+      return request(app).get('/api/v1/user/')
+        .set('Authorization', 'Bearer token1')
+        .expect(401)
+        .then(res => expect(res.body.success).toBe(false))
+    })
+
+    it('should return an array of all users if token 2 is used', () => {
+      return request(app).get('/api/v1/user/')
+        .set('Authorization', 'Bearer token2')
+        .expect(200)
+        .then(res => expect(res.body.content.users).toEqual(mockUserData))
+    })
+
+    it('should return an array of all users if token 3 is used', () => {
+      return request(app).get('/api/v1/user/')
+        .set('Authorization', 'Bearer token3')
+        .expect(200)
+        .then(res => expect(res.body.content.users).toEqual(mockUserData))
+    })
 
   })
 
@@ -148,33 +165,66 @@ describe('User Routes', () => {
         .then(res => expect(res.body).toBeInstanceOf(Object))
     })
 
-    // it('should return user 1 if token 1 is used for ID 1', () => {
-    //
-    // })
-    //
-    // it('should return 401 if token 1 is used for ID 2', () => {
-    //
-    // })
-    //
-    // it('should return 401 if token 1 is used for ID 3', () => {
-    //
-    // })
-    //
-    // it('should return user 1 if token 2 is used for ID 1', () => {
-    //
-    // })
-    //
-    // it('should return user 1 if token 3 is used for ID 1', () => {
-    //
-    // })
-    //
-    // it('should return user 3 if token 2 is used for ID 3', () => {
-    //
-    // })
-    //
-    // it('should return 400 if token 3 is used with ID 99', () => {
-    //
-    // })
+    it('should return user 1 if token 1 is used for ID 1', () => {
+      return request(app).get('/api/v1/user/1')
+        .set('Authorization', 'Bearer token1')
+        .expect(200)
+        .then(res => {
+          expect(res.body.success).toBe(true)
+          expect(res.body.content.user).toEqual(mockUserData[0])
+        })
+    })
+
+    it('should return 401 if token 1 is used for ID 2', () => {
+      return request(app).get('/api/v1/user/2')
+        .set('Authorization', 'Bearer token1')
+        .expect(401)
+        .then(res => expect(res.body.success).toBe(false))
+    })
+
+    it('should return 401 if token 1 is used for ID 3', () => {
+      return request(app).get('/api/v1/user/3')
+        .set('Authorization', 'Bearer token1')
+        .expect(401)
+        .then(res => expect(res.body.success).toBe(false))
+    })
+
+    it('should return user 1 if token 2 is used for ID 1', () => {
+      return request(app).get('/api/v1/user/1')
+        .set('Authorization', 'Bearer token2')
+        .expect(200)
+        .then(res => {
+          expect(res.body.success).toBe(true)
+          expect(res.body.content.user).toEqual(mockUserData[0])
+        })
+    })
+
+    it('should return user 1 if token 3 is used for ID 1', () => {
+      return request(app).get('/api/v1/user/1')
+        .set('Authorization', 'Bearer token3')
+        .expect(200)
+        .then(res => {
+          expect(res.body.success).toBe(true)
+          expect(res.body.content.user).toEqual(mockUserData[0])
+        })
+    })
+
+    it('should return user 3 if token 2 is used for ID 3', () => {
+      return request(app).get('/api/v1/user/3')
+        .set('Authorization', 'Bearer token2')
+        .expect(200)
+        .then(res => {
+          expect(res.body.success).toBe(true)
+          expect(res.body.content.user).toEqual(mockUserData[2])
+        })
+    })
+
+    it('should return 400 if token 3 is used with ID 99', () => {
+      return request(app).get('/api/v1/user/99')
+        .set('Authorization', 'Bearer token3')
+        .expect(400)
+        .then(res => expect(res.body.success).toBe(false))
+    })
 
   })
 

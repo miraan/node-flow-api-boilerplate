@@ -5,24 +5,31 @@ import FacebookClient from '../FacebookClient'
 import crypto from 'crypto'
 import path from 'path'
 import TokenStore from '../stores/TokenStore'
-import users from '../../data/users'
+import DataStore from '../stores/DataStore'
 import { saveItems, genId } from '../util/save'
 
 import type { Debugger } from 'debug'
-import type { User } from '../util/types'
+import type { User, CreateUserPayload } from '../util/types'
 
 export default class LoginRouter {
   router: Router
   path: string
   logger: Debugger
   tokenStore: TokenStore
+  dataStore: DataStore
   facebookClient: FacebookClient
 
-  constructor(tokenStore: TokenStore, logger: Debugger, path: string = '/api/v1/login') {
+  constructor(
+    logger: Debugger,
+    tokenStore: TokenStore,
+    dataStore: DataStore,
+    path: string = '/api/v1/login'
+  ) {
     this.router = Router()
     this.path = path
     this.logger = logger
     this.tokenStore = tokenStore
+    this.dataStore = dataStore
     this.facebookClient = new FacebookClient()
     this.init()
   }
@@ -41,15 +48,14 @@ export default class LoginRouter {
       return
     }
     const extendTokenPromise = this.facebookClient.extendFacebookAccessToken(facebookAccessToken)
-    const getProfilePromise = extendTokenPromise.then(newFacebookAccessToken => {
-      return this.facebookClient.getProfile(newFacebookAccessToken)
+    const getFacebookProfilePromise = this.facebookClient.getProfile(facebookAccessToken)
+    const getUserPromise = getFacebookProfilePromise.then(facebookProfile => {
+      return this.dataStore.getUserByFacebookId(facebookProfile.facebookId)
     })
-    Promise.all([extendTokenPromise, getProfilePromise])
-    .then(([newFacebookAccessToken, facebookProfile]) => {
-      let user: User = users.find(user => user.facebookId === facebookProfile.facebookId)
+    Promise.all([extendTokenPromise, getFacebookProfilePromise, getUserPromise])
+    .then(([newFacebookAccessToken, facebookProfile, user]) => {
       if (!user) {
-        user = {
-          id: genId(users),
+        const createUserPayload: CreateUserPayload = {
           firstName: facebookProfile.firstName,
           lastName: facebookProfile.lastName,
           facebookId: facebookProfile.facebookId,
@@ -57,10 +63,14 @@ export default class LoginRouter {
           level: 1,
           facebookAccessToken: newFacebookAccessToken,
         }
-        users.push(user)
+        return this.dataStore.createUser(createUserPayload)
       } else {
-        user.facebookAccessToken = newFacebookAccessToken
+        return this.dataStore.updateUser(user.id, {
+          facebookAccessToken: newFacebookAccessToken,
+        })
       }
+    })
+    .then(user => {
       const localToken = crypto.randomBytes(20).toString('hex')
       this.tokenStore.setToken(localToken, user.id)
       res.status(200).json({
@@ -69,13 +79,8 @@ export default class LoginRouter {
           token: localToken
         }
       })
-      return saveItems(users, 'users.json')
     })
-    .then(writePath => {
-      this.logger(`Users updated. Written to: ` +
-        `${path.relative(path.join(__dirname, '..', '..'), writePath)}`)
-    })
-    .catch((error) => {
+    .catch(error => {
       res.status(200).json({
         success: false,
         errorMessage: 'Facebook Login Error: ' + error
