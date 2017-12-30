@@ -1,10 +1,10 @@
 // @flow
 
 import { Router } from 'express'
-import FacebookClient from '../util/FacebookClient'
+import FacebookClient from '../FacebookClient'
 import crypto from 'crypto'
 import path from 'path'
-import TokenStore from '../util/TokenStore'
+import TokenStore from '../TokenStore'
 import users from '../../data/users'
 import { saveItems, genId } from '../util/save'
 

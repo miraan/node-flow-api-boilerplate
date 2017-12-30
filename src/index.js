@@ -5,7 +5,7 @@
 import * as http from 'http'
 import debug from 'debug'
 import ServerConfigurationObject from './configuration'
-import TokenStore from './util/TokenStore'
+import TokenStore from './TokenStore'
 import Api from './Api'
 
 import type { Debugger } from 'debug'

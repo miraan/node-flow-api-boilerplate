@@ -5,7 +5,7 @@ import morgan from 'morgan'
 import bodyParser from 'body-parser'
 import passport from 'passport'
 import { Strategy } from 'passport-http-bearer'
-import TokenStore from './util/TokenStore'
+import TokenStore from './TokenStore'
 import users from '../data/users'
 
 import ProduceRouter from './routers/ProduceRouter'
