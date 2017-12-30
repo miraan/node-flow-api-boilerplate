@@ -5,8 +5,8 @@ import morgan from 'morgan'
 import bodyParser from 'body-parser'
 import passport from 'passport'
 import { Strategy } from 'passport-http-bearer'
-import TokenStore from './TokenStore'
-import users from '../data/users'
+import TokenStore from './stores/TokenStore'
+import DataStore from './stores/DataStore'
 
 import ProduceRouter from './routers/ProduceRouter'
 import LoginRouter from './routers/LoginRouter'
@@ -19,11 +19,13 @@ export default class Api {
   express: express$Application
   logger: Debugger
   tokenStore: TokenStore
+  dataStore: DataStore
 
-  constructor(logger: Debugger, tokenStore: TokenStore) {
+  constructor(logger: Debugger, tokenStore: TokenStore, dataStore: DataStore) {
     this.express = express()
     this.logger = logger
     this.tokenStore = tokenStore
+    this.dataStore = dataStore
     this.initMiddleware()
     this.initPassport()
     this.initRoutes()

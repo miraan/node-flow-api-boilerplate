@@ -1,7 +1,7 @@
 // @flow
 
 import FB from 'fb'
-import ServerConfigurationObject from '../configuration'
+import ServerConfigurationObject from './configuration'
 
 type FacebookProfile = {
   facebookId: string,

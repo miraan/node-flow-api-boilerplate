@@ -1,198 +1,263 @@
+// @flow
+
 import request from 'supertest'
-import Api from '../src/Api'
 import debug from 'debug'
+import Api from '../src/Api'
 
 import type { Debugger } from 'debug'
+import type { User } from '../src/util/types'
+
+jest.mock('../src/stores/TokenStore')
+import TokenStore from '../src/stores/TokenStore'
+
+const mockUserData: Array<User> = [
+  {
+    id: 1,
+    firstName: "John",
+    lastName: "Smith",
+    facebookId: "432432",
+    facebookAccessToken: "x4234x3",
+    email: "john@smith.com",
+    level: 1,
+  },
+  {
+    id: 2,
+    firstName: "Joe",
+    lastName: "Bloggs",
+    facebookId: "34324",
+    facebookAccessToken: "432d234s343",
+    email: "joe@bloggs.com",
+    level: 2,
+  },
+  {
+    id: 3,
+    firstName: "Miraan",
+    lastName: "Tabrez",
+    facebookId: "324354654354",
+    facebookAccessToken: "4jh3k2h4jk32hj43243k2kkh432",
+    email: "miraan@miraan.co.uk",
+    level: 3,
+  },
+]
+
+const mockTokenStoreData = {
+  'token1': 1,
+  'token2': 2,
+  'token3': 3,
+}
+
+const mockGetUserId = jest.fn().mockImplementation(token => {
+  const userId = mockTokenStoreData[token]
+  if (userId) {
+    return Promise.resolve(userId)
+  }
+  return Promise.resolve(null)
+})
+
+TokenStore.mockImplementation(() => {
+  return {
+    getUserId: mockGetUserId,
+  }
+})
 
 const logger: Debugger = debug('jest-logger:')
-const app: Api = new Api(logger).express
+const tokenStore: TokenStore = new TokenStore()
+const app = new Api(logger, tokenStore).express
 
 describe('User Routes', () => {
 
   describe('GET /api/v1/user/me - get own profile', () => {
 
     it('should return JSON', () => {
-      request(app).get('/api/v1/user/me')
+      return request(app).get('/api/v1/user/me')
         .expect('Content-Type', /json/)
         .then(res => expect(res.body).toBeInstanceOf(Object))
     })
 
     it('should return 401 if no token is used', () => {
-      request(app).get('/api/v1/user/me')
+      return request(app).get('/api/v1/user/me')
         .expect(401)
+        .then(res => expect(res.body.success).toBe(false))
     })
 
     it('should return 401 if invalid token is used', () => {
-      request(app).get('/api/v1/user/me')
-        .set('Authorization', 'Bearer 563782bc8f333777457d2cef114efcb14052cec1')
+      return request(app).get('/api/v1/user/me')
+        .set('Authorization', 'Bearer invalidtoken')
+        .expect(401)
+        .then(res => expect(res.body.success).toBe(false))
+    })
+
+    it('should return user 1 if token 1 is used', () => {
+      return request(app).get('/api/v1/user/me')
+        .set('Authorization', 'Bearer token1')
         .expect(200)
+        .then(res => {
+          expect(res.body.success).toBe(true)
+          expect(res.body.content.user).toEqual(mockUserData[0])
+        })
     })
 
-    it('should return user A if token A is used', () => {
-
-    })
-
-    it('should return user B if token B is used', () => {
-
-    })
+    // it('should return user 2 if token 2 is used', () => {
+    //
+    // })
 
   })
 
   describe('GET /api/v1/user/ - get all users', () => {
 
     it('should return JSON', () => {
-      request(app).get('/api/v1/user/')
+      return request(app).get('/api/v1/user/')
         .expect('Content-Type', /json/)
         .then(res => expect(res.body).toBeInstanceOf(Object))
     })
 
-    it('should return 401 if no token is used', () => {
-
-    })
-
-    it('should return 401 if token A is used', () => {
-
-    })
-
-    it('should return an array of all users if token B is used', () => {
-
-    })
-
-    it('should return an array of all users if token C is used', () => {
-
-    })
+    // it('should return 401 if no token is used', () => {
+    //
+    // })
+    //
+    // it('should return 401 if token 1 is used', () => {
+    //
+    // })
+    //
+    // it('should return an array of all users if token 2 is used', () => {
+    //
+    // })
+    //
+    // it('should return an array of all users if token 3 is used', () => {
+    //
+    // })
 
   })
 
-  describe('GET /api/v1/user/:id - get a user by ID', () => {
+  describe('GET /api/v1/user/:id - get a user 2y ID', () => {
 
     it('should return JSON', () => {
-      request(app).get('/api/v1/user/1')
+      return request(app).get('/api/v1/user/1')
         .expect('Content-Type', /json/)
         .then(res => expect(res.body).toBeInstanceOf(Object))
     })
 
-    it('should return user A if token A is used for ID 1', () => {
-
-    })
-
-    it('should return 401 if token A is used for ID 2', () => {
-
-    })
-
-    it('should return 401 if token A is used for ID 3', () => {
-
-    })
-
-    it('should return user A if token B is used for ID 1', () => {
-
-    })
-
-    it('should return user A if token C is used for ID 1', () => {
-
-    })
-
-    it('should return user C if token B is used for ID 3', () => {
-
-    })
-
-    it('should return 400 if token C is used with ID 99', () => {
-
-    })
+    // it('should return user 1 if token 1 is used for ID 1', () => {
+    //
+    // })
+    //
+    // it('should return 401 if token 1 is used for ID 2', () => {
+    //
+    // })
+    //
+    // it('should return 401 if token 1 is used for ID 3', () => {
+    //
+    // })
+    //
+    // it('should return user 1 if token 2 is used for ID 1', () => {
+    //
+    // })
+    //
+    // it('should return user 1 if token 3 is used for ID 1', () => {
+    //
+    // })
+    //
+    // it('should return user 3 if token 2 is used for ID 3', () => {
+    //
+    // })
+    //
+    // it('should return 400 if token 3 is used with ID 99', () => {
+    //
+    // })
 
   })
 
   describe('POST /api/v1/user/ - create a new user', () => {
 
     it('should return JSON', () => {
-      request(app).post('/api/v1/user/')
+      return request(app).post('/api/v1/user/')
         .expect('Content-Type', /json/)
         .then(res => expect(res.body).toBeInstanceOf(Object))
     })
 
-    it('should return 401 if token A is used', () => {
-
-    })
-
-    it('should return 400 if token B is used with incomplete payload', () => {
-
-    })
-
-    it('should return success if token B is used', () => {
-
-    })
-
-    it('should return success if token C is used', () => {
-
-    })
+    // it('should return 401 if token 1 is used', () => {
+    //
+    // })
+    //
+    // it('should return 400 if token 2 is used with incomplete payload', () => {
+    //
+    // })
+    //
+    // it('should return success if token 2 is used', () => {
+    //
+    // })
+    //
+    // it('should return success if token 3 is used', () => {
+    //
+    // })
 
   })
 
   describe('PUT /api/v1/user/:id - update a user', () => {
 
     it('should return JSON', () => {
-      request(app).put('/api/v1/user/1')
+      return request(app).put('/api/v1/user/1')
         .expect('Content-Type', /json/)
         .then(res => expect(res.body).toBeInstanceOf(Object))
     })
 
-    it('should return success if token A is used on ID 1', () => {
-
-    })
-
-    it('should return 401 if token A is used on ID 2', () => {
-
-    })
-
-    it('should return 401 if token A is used on ID 3', () => {
-
-    })
-
-    it('should return 401 if token B is used on ID 3', () => {
-
-    })
-
-    it('should return success if token B is used on ID 1', () => {
-
-    })
-
-    it('should return success if token C is used on ID 2', () => {
-
-    })
+    // it('should return success if token 1 is used on ID 1', () => {
+    //
+    // })
+    //
+    // it('should return 401 if token 1 is used on ID 2', () => {
+    //
+    // })
+    //
+    // it('should return 401 if token 1 is used on ID 3', () => {
+    //
+    // })
+    //
+    // it('should return 401 if token 2 is used on ID 3', () => {
+    //
+    // })
+    //
+    // it('should return success if token 2 is used on ID 1', () => {
+    //
+    // })
+    //
+    // it('should return success if token 3 is used on ID 2', () => {
+    //
+    // })
 
   })
 
   describe('DELETE /api/v1/user/:id - delete a user', () => {
 
     it('should return JSON', () => {
-      request(app).delete('/api/v1/user/1')
+      return request(app).delete('/api/v1/user/1')
         .expect('Content-Type', /json/)
         .then(res => expect(res.body).toBeInstanceOf(Object))
     })
 
-    it('should return success if token A is used on ID 1', () => {
-
-    })
-
-    it('should return 401 if token A is used on ID 2', () => {
-
-    })
-
-    it('should return 401 if token A is used on ID 3', () => {
-
-    })
-
-    it('should return 401 if token B is used on ID 3', () => {
-
-    })
-
-    it('should return success if token B is used on ID 1', () => {
-
-    })
-
-    it('should return success if token C is used on ID 2', () => {
-
-    })
+    // it('should return success if token 1 is used on ID 1', () => {
+    //
+    // })
+    //
+    // it('should return 401 if token 1 is used on ID 2', () => {
+    //
+    // })
+    //
+    // it('should return 401 if token 1 is used on ID 3', () => {
+    //
+    // })
+    //
+    // it('should return 401 if token 2 is used on ID 3', () => {
+    //
+    // })
+    //
+    // it('should return success if token 2 is used on ID 1', () => {
+    //
+    // })
+    //
+    // it('should return success if token 3 is used on ID 2', () => {
+    //
+    // })
 
   })
 

@@ -25,7 +25,7 @@ export default class TokenStore {
     this.redisClient.set(token, userId, 'EX', ServerConfigurationObject.tokenExpireTimeSeconds)
   }
 
-  getUserId: string => Promise<?number> = (token: string) => {
+  getUserId: (string => Promise<?number>) = (token: string) => {
     return new Promise((resolve, reject) => {
       // $FlowFixMe
       this.redisClient.get(token, (error, value) => {

@@ -4,7 +4,7 @@ import { Router } from 'express'
 import FacebookClient from '../FacebookClient'
 import crypto from 'crypto'
 import path from 'path'
-import TokenStore from '../TokenStore'
+import TokenStore from '../stores/TokenStore'
 import users from '../../data/users'
 import { saveItems, genId } from '../util/save'
 
