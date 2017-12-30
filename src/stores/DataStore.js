@@ -15,7 +15,7 @@ export default class DataStore {
     this.logger = logger
   }
 
-  getUsers: () => Promise<?Array<User>> = () => {
+  getUsers: () => Promise<Array<User>> = () => {
     return new Promise((resolve, reject) => {
       resolve(users)
     })
@@ -73,6 +73,23 @@ export default class DataStore {
       })
       .catch(error => {
         reject('DataStore updateUser error: ' + error)
+      })
+    })
+  }
+
+  deleteUser: number => Promise<User> = (userId: number) => {
+    return new Promise((resolve, reject) => {
+      const index: number = users.findIndex(user => user.id === userId)
+      if (index === -1) {
+        reject('DataStore deleteUser error: No user found with given userId.')
+        return
+      }
+      const deletedRecord = users.splice(index, 1)[0]
+      this._saveUsers().then(writePath => {
+        resolve(deletedRecord)
+      })
+      .catch(error => {
+        reject('DataStore deleteUser error: ' + error)
       })
     })
   }

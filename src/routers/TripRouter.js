@@ -3,6 +3,7 @@
 import { Router } from 'express'
 import path from 'path'
 import _ from 'lodash'
+import DataStore from '../stores/DataStore'
 import trips from '../../data/trips'
 import passportBearerAuthenticated from '../util/passportBearerAuthenticated'
 import { parseCreateTripPayload, parseUpdateTripPayload } from '../util/parsers'
@@ -15,11 +16,13 @@ export default class TripRouter {
   router: Router
   path: string
   logger: Debugger
+  dataStore: DataStore
 
-  constructor(logger: Debugger, path: string = '/api/v1/trip') {
+  constructor(logger: Debugger, dataStore: DataStore, path: string = '/api/v1/trip') {
     this.router = Router()
     this.path = path
     this.logger = logger
+    this.dataStore = dataStore
     this.init()
   }
 

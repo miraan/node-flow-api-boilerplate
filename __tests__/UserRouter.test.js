@@ -5,6 +5,7 @@ jest.mock('../src/stores/DataStore')
 
 import request from 'supertest'
 import debug from 'debug'
+import _ from 'lodash'
 import Api from '../src/Api'
 import TokenStore from '../src/stores/TokenStore'
 import DataStore from '../src/stores/DataStore'
@@ -48,25 +49,47 @@ const mockTokenStoreData = {
   'token3': 3,
 }
 
-const mockTokenStoreGetUserId = jest.fn().mockImplementation(token =>
-  Promise.resolve(mockTokenStoreData[token]))
-
 TokenStore.mockImplementation(() => {
   return {
-    getUserId: mockTokenStoreGetUserId,
+    getUserId: jest.fn().mockImplementation(token => {
+      return Promise.resolve(mockTokenStoreData[token])
+    }),
   }
 })
 
-const mockDataStoreGetUsers = jest.fn().mockImplementation(() => {
-  return Promise.resolve(mockUserData)
-})
-const mockDataStoreGetUser = jest.fn().mockImplementation(userId =>
-  Promise.resolve(mockUserData.find(user => user.id === userId)))
-
 DataStore.mockImplementation(() => {
   return {
-    getUsers: mockDataStoreGetUsers,
-    getUser: mockDataStoreGetUser,
+    getUsers: jest.fn().mockImplementation(() => {
+      return Promise.resolve(mockUserData)
+    }),
+    getUserById: jest.fn().mockImplementation(userId => {
+      return Promise.resolve(mockUserData.find(user => user.id === userId))
+    }),
+    createUser: jest.fn().mockImplementation(payload => {
+      const newUserId = _.maxBy(mockUserData, user => user.id).id + 1
+      const newUser: User = {
+        id: newUserId,
+        ...payload,
+      }
+      mockUserData.push(newUser)
+      return Promise.resolve(newUser)
+    }),
+    updateUser: jest.fn().mockImplementation((userId, payload) => {
+      const user: ?User = mockUserData.find(user => user.id === userId)
+      if (!user) {
+        return Promise.reject('No mock user with that ID.')
+      }
+      Object.assign(user, payload)
+      return Promise.resolve(user)
+    }),
+    deleteUser: jest.fn().mockImplementation(userId => {
+      const index: number = mockUserData.findIndex(user => user.id === userId)
+      if (index === -1) {
+        return Promise.reject('No mock user with that ID.')
+      }
+      const deletedUser = mockUserData.splice(index, 1)[0]
+      return Promise.resolve(deletedUser)
+    }),
   }
 })
 
@@ -157,7 +180,7 @@ describe('User Routes', () => {
 
   })
 
-  describe('GET /api/v1/user/:id - get a user 2y ID', () => {
+  describe('GET /api/v1/user/:id - get a user by ID', () => {
 
     it('should return JSON', () => {
       return request(app).get('/api/v1/user/1')

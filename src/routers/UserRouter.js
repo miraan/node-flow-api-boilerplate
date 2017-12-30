@@ -3,7 +3,7 @@
 import { Router } from 'express'
 import path from 'path'
 import _ from 'lodash'
-import users from '../../data/users'
+import DataStore from '../stores/DataStore'
 import passportBearerAuthenticated from '../util/passportBearerAuthenticated'
 import { parseCreateUserPayload, parseUpdateUserPayload } from '../util/parsers'
 import { saveItems, genId } from '../util/save'
@@ -15,11 +15,13 @@ export default class UserRouter {
   router: Router
   path: string
   logger: Debugger
+  dataStore: DataStore
 
-  constructor(logger: Debugger, path: string = '/api/v1/user') {
+  constructor(logger: Debugger, dataStore: DataStore, path: string = '/api/v1/user') {
     this.router = Router()
     this.path = path
     this.logger = logger
+    this.dataStore = dataStore
     this.init()
   }
 
@@ -50,11 +52,20 @@ export default class UserRouter {
       })
       return
     }
-    res.status(200).json({
-      success: true,
-      content: {
-        users: users
-      }
+    this.dataStore.getUsers().then(users => {
+      res.status(200).json({
+        success: true,
+        content: {
+          users: users
+        }
+      })
+    })
+    .catch(error => {
+      this.logger('UserRouter getAll Error: ' + error)
+      res.status(500).json({
+        success: false,
+        errorMessage: 'Error getting users.'
+      })
     })
   }
 
@@ -68,20 +79,28 @@ export default class UserRouter {
       })
       return
     }
-    const record: User = users.find(item => item.id === id)
-    if (record) {
+    this.dataStore.getUserById(id).then(record => {
+      if (!record) {
+        res.status(400).json({
+          success: false,
+          errorMessage: 'No user with that ID exists.'
+        })
+        return
+      }
       res.status(200).json({
         success: true,
         content: {
           user: record
         }
       })
-    } else {
-      res.status(400).json({
+    })
+    .catch(error => {
+      this.logger('UserRouter getById Error: ' + error)
+      res.status(500).json({
         success: false,
-        errorMessage: 'No user with that ID exists.'
+        errorMessage: 'Error getting user.'
       })
-    }
+    })
   }
 
   postOne = (req: $Request, res: $Response) => {
@@ -101,18 +120,21 @@ export default class UserRouter {
       })
       return
     }
-    const newUser: User = {
-      ...payload,
-      id: genId(users)
-    }
-    users.push(newUser)
-    res.status(200).json({
-      success: true,
-      content: {
-        user: newUser
-      }
+    this.dataStore.createUser(payload).then(newUser => {
+      res.status(200).json({
+        success: true,
+        content: {
+          user: newUser
+        }
+      })
     })
-    this.saveUsersFile()
+    .catch(error => {
+      this.logger('UserRouter postOne Error: ' + error)
+      res.status(500).json({
+        success: false,
+        errorMessage: 'Error creating user.'
+      })
+    })
   }
 
   updateById = (req: $Request, res: $Response) => {
@@ -125,38 +147,46 @@ export default class UserRouter {
       })
       return
     }
-    const record: User = users.find(item => item.id === id)
-    if (!record) {
-      res.status(400).json({
-        success: false,
-        errorMessage: 'No user with that ID exists.'
-      })
-      return
-    }
-    if (record.level >= user.level) {
-      res.status(401).json({
-        success: false,
-        errorMessage: 'Unauthorized.'
-      })
-      return
-    }
-    const payload: ?UpdateUserPayload = parseUpdateUserPayload(req.body)
-    if (!payload) {
-      res.status(400).json({
-        success: false,
-        errorMessage: 'Invalid update user payload.'
-      })
-      return
-    }
-    // $FlowFixMe
-    Object.assign(record, payload)
-    res.status(200).json({
-      success: true,
-      content: {
-        user: record
+    this.dataStore.getUserById(id).then(record => {
+      if (!record) {
+        res.status(400).json({
+          success: false,
+          errorMessage: 'No user with that ID exists.'
+        })
+        return
       }
+      if (record.id !== user.id && record.level >= user.level) {
+        res.status(401).json({
+          success: false,
+          errorMessage: 'Unauthorized.'
+        })
+        return
+      }
+      const payload: ?UpdateUserPayload = parseUpdateUserPayload(req.body)
+      if (!payload) {
+        res.status(400).json({
+          success: false,
+          errorMessage: 'Invalid update user payload.'
+        })
+        return
+      }
+      return this.dataStore.updateUser(record.id, payload)
     })
-    this.saveUsersFile()
+    .then(record => {
+      res.status(200).json({
+        success: true,
+        content: {
+          user: record
+        }
+      })
+    })
+    .catch(error => {
+      this.logger('UserRouter updateById Error: ' + error)
+      res.status(500).json({
+        success: false,
+        errorMessage: 'Error updating user.'
+      })
+    })
   }
 
   removeById = (req: $Request, res: $Response) => {
@@ -169,41 +199,37 @@ export default class UserRouter {
       })
       return
     }
-    const recordIndex: number = users.findIndex(item => item.id === id)
-    if (recordIndex === -1) {
-      res.status(400).json({
-        success: false,
-        errorMessage: 'No user with that ID exists.'
-      })
-      return
-    }
-    const record: User = users[recordIndex]
-    if (record.level >= user.level) {
-      res.status(401).json({
-        success: false,
-        errorMessage: 'Unauthorized.'
-      })
-      return
-    }
-    const deletedRecord = users.splice(recordIndex, 1)[0]
-    res.status(200).json({
-      success: true,
-      content: {
-        user: deletedRecord
+    this.dataStore.getUserById(id).then(record => {
+      if (!record) {
+        res.status(400).json({
+          success: false,
+          errorMessage: 'No user with that ID exists.'
+        })
+        return
       }
+      if (record.id !== user.id && record.level >= user.level) {
+        res.status(401).json({
+          success: false,
+          errorMessage: 'Unauthorized.'
+        })
+        return
+      }
+      return this.dataStore.deleteUser(record.id)
     })
-    this.saveUsersFile()
-  }
-
-  saveUsersFile = () => {
-    saveItems(users, 'users.json')
-    .then(writePath => {
-      this.logger(`Users updated. Written to:\n\t` +
-        `${path.relative(path.join(__dirname, '..', '..'), writePath)}`)
+    .then(deletedUser => {
+      res.status(200).json({
+        success: true,
+        content: {
+          user: deletedUser
+        }
+      })
     })
-    .catch(err => {
-      this.logger('Error writing to users file.')
-      this.logger(err.stack)
+    .catch(error => {
+      this.logger('UserRouter removeById Error: ' + error)
+      res.status(500).json({
+        success: false,
+        errorMessage: 'Error updating user.'
+      })
     })
   }
 }
