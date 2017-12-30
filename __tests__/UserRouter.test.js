@@ -83,12 +83,11 @@ DataStore.mockImplementation(() => {
       return Promise.resolve(user)
     }),
     deleteUser: jest.fn().mockImplementation(userId => {
-      const index: number = mockUserData.findIndex(user => user.id === userId)
-      if (index === -1) {
+      const user: ?User = mockUserData.find(user => user.id === userId)
+      if (!user) {
         return Promise.reject('No mock user with that ID.')
       }
-      const deletedUser = mockUserData.splice(index, 1)[0]
-      return Promise.resolve(deletedUser)
+      return Promise.resolve(user)
     }),
   }
 })
@@ -397,29 +396,59 @@ describe('User Routes', () => {
         .then(res => expect(res.body).toBeInstanceOf(Object))
     })
 
-    // it('should return success if token 1 is used on ID 1', () => {
-    //
-    // })
-    //
-    // it('should return 401 if token 1 is used on ID 2', () => {
-    //
-    // })
-    //
-    // it('should return 401 if token 1 is used on ID 3', () => {
-    //
-    // })
-    //
-    // it('should return 401 if token 2 is used on ID 3', () => {
-    //
-    // })
-    //
-    // it('should return success if token 2 is used on ID 1', () => {
-    //
-    // })
-    //
-    // it('should return success if token 3 is used on ID 2', () => {
-    //
-    // })
+    it('should return success if token 1 is used on ID 1', () => {
+      return request(app).delete('/api/v1/user/1')
+        .set('Authorization', 'Bearer token1')
+        .expect(200)
+        .then(res => {
+          expect(res.body.success).toBe(true)
+          const returnedUser: User = res.body.content.user
+          expect(returnedUser).toEqual(mockUserData[0])
+        })
+    })
+
+    it('should return 401 if token 1 is used on ID 2', () => {
+      return request(app).delete('/api/v1/user/2')
+        .set('Authorization', 'Bearer token1')
+        .expect(401)
+        .then(res => expect(res.body.success).toBe(false))
+    })
+
+    it('should return 401 if token 1 is used on ID 3', () => {
+      return request(app).delete('/api/v1/user/3')
+        .set('Authorization', 'Bearer token1')
+        .expect(401)
+        .then(res => expect(res.body.success).toBe(false))
+    })
+
+    it('should return 401 if token 2 is used on ID 3', () => {
+      return request(app).delete('/api/v1/user/3')
+        .set('Authorization', 'Bearer token2')
+        .expect(401)
+        .then(res => expect(res.body.success).toBe(false))
+    })
+
+    it('should return success if token 2 is used on ID 1', () => {
+      return request(app).delete('/api/v1/user/1')
+        .set('Authorization', 'Bearer token2')
+        .expect(200)
+        .then(res => {
+          expect(res.body.success).toBe(true)
+          const returnedUser: User = res.body.content.user
+          expect(returnedUser).toEqual(mockUserData[0])
+        })
+    })
+
+    it('should return success if token 3 is used on ID 2', () => {
+      return request(app).delete('/api/v1/user/2')
+        .set('Authorization', 'Bearer token3')
+        .expect(200)
+        .then(res => {
+          expect(res.body.success).toBe(true)
+          const returnedUser: User = res.body.content.user
+          expect(returnedUser).toEqual(mockUserData[1])
+        })
+    })
 
   })
 
