@@ -48,13 +48,9 @@ const mockTokenStoreData = {
   'token3': 3,
 }
 
-const mockTokenStoreGetUserId = jest.fn().mockImplementation(token => {
-  const userId = mockTokenStoreData[token]
-  if (userId) {
-    return Promise.resolve(userId)
-  }
-  return Promise.resolve(null)
-})
+const mockTokenStoreGetUserId = jest.fn().mockImplementation(token =>
+  Promise.resolve(mockTokenStoreData[token]))
+
 TokenStore.mockImplementation(() => {
   return {
     getUserId: mockTokenStoreGetUserId,
@@ -64,13 +60,9 @@ TokenStore.mockImplementation(() => {
 const mockDataStoreGetUsers = jest.fn().mockImplementation(() => {
   return Promise.resolve(mockUserData)
 })
-const mockDataStoreGetUser = jest.fn().mockImplementation(userId => {
-  const user: ?User = mockUserData.find(user => user.id === userId)
-  if (!user) {
-    return Promise.resolve(null)
-  }
-  return Promise.resolve(user)
-})
+const mockDataStoreGetUser = jest.fn().mockImplementation(userId =>
+  Promise.resolve(mockUserData.find(user => user.id === userId)))
+
 DataStore.mockImplementation(() => {
   return {
     getUsers: mockDataStoreGetUsers,
@@ -79,8 +71,8 @@ DataStore.mockImplementation(() => {
 })
 
 const logger: Debugger = debug('jest-logger:')
-const tokenStore: TokenStore = new TokenStore()
-const dataStore: DataStore = new DataStore()
+const tokenStore: TokenStore = new TokenStore(logger)
+const dataStore: DataStore = new DataStore(logger)
 const app = new Api(logger, tokenStore, dataStore).express
 
 describe('User Routes', () => {
