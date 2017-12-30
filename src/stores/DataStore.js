@@ -20,7 +20,7 @@ export default class DataStore {
 
   getUser: number => Promise<?User> = (userId: number) => {
     return new Promise((resolve, reject) => {
-      const user: User = users.find(user => user.id === userId)
+      const user: ?User = users.find(user => user.id === userId)
       if (!user) {
         resolve(null)
         return
@@ -28,5 +28,4 @@ export default class DataStore {
       resolve(user)
     })
   }
-
 }

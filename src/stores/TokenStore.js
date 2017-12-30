@@ -30,7 +30,7 @@ export default class TokenStore {
       // $FlowFixMe
       this.redisClient.get(token, (error, value) => {
         if (error) {
-          reject('Redis Get Error: ' + error)
+          reject('Token Store Get Error: Redis Get Error: ' + error)
           return
         }
         if (!value) {

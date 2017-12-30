@@ -1,14 +1,16 @@
 // @flow
 
+jest.mock('../src/stores/TokenStore')
+jest.mock('../src/stores/DataStore')
+
 import request from 'supertest'
 import debug from 'debug'
 import Api from '../src/Api'
+import TokenStore from '../src/stores/TokenStore'
+import DataStore from '../src/stores/DataStore'
 
 import type { Debugger } from 'debug'
 import type { User } from '../src/util/types'
-
-jest.mock('../src/stores/TokenStore')
-import TokenStore from '../src/stores/TokenStore'
 
 const mockUserData: Array<User> = [
   {
@@ -46,23 +48,40 @@ const mockTokenStoreData = {
   'token3': 3,
 }
 
-const mockGetUserId = jest.fn().mockImplementation(token => {
+const mockTokenStoreGetUserId = jest.fn().mockImplementation(token => {
   const userId = mockTokenStoreData[token]
   if (userId) {
     return Promise.resolve(userId)
   }
   return Promise.resolve(null)
 })
-
 TokenStore.mockImplementation(() => {
   return {
-    getUserId: mockGetUserId,
+    getUserId: mockTokenStoreGetUserId,
+  }
+})
+
+const mockDataStoreGetUsers = jest.fn().mockImplementation(() => {
+  return Promise.resolve(mockUserData)
+})
+const mockDataStoreGetUser = jest.fn().mockImplementation(userId => {
+  const user: ?User = mockUserData.find(user => user.id === userId)
+  if (!user) {
+    return Promise.resolve(null)
+  }
+  return Promise.resolve(user)
+})
+DataStore.mockImplementation(() => {
+  return {
+    getUsers: mockDataStoreGetUsers,
+    getUser: mockDataStoreGetUser,
   }
 })
 
 const logger: Debugger = debug('jest-logger:')
 const tokenStore: TokenStore = new TokenStore()
-const app = new Api(logger, tokenStore).express
+const dataStore: DataStore = new DataStore()
+const app = new Api(logger, tokenStore, dataStore).express
 
 describe('User Routes', () => {
 

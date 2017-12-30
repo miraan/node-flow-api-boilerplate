@@ -43,14 +43,16 @@ export default class Api {
         if (!userId) {
           return cb(null, false)
         }
-        const user = users.find(user => user.id === userId)
+        return this.dataStore.getUser(userId)
+      })
+      .then(user => {
         if (!user) {
           return cb('Authentication Error: No user found for valid token.')
         }
         return cb(null, user)
       })
       .catch(error => {
-        return cb('Token Store Get Error: ' + error)
+        return cb('Authentication Error: ' + error)
       })
     }))
   }
