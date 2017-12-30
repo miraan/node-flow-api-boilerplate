@@ -85,7 +85,7 @@ export default class UserRouter {
           success: false,
           errorMessage: 'No user with that ID exists.'
         })
-        return
+        return Promise.reject(null)
       }
       res.status(200).json({
         success: true,
@@ -95,6 +95,9 @@ export default class UserRouter {
       })
     })
     .catch(error => {
+      if (!error) {
+        return
+      }
       this.logger('UserRouter getById Error: ' + error)
       res.status(500).json({
         success: false,
@@ -153,14 +156,14 @@ export default class UserRouter {
           success: false,
           errorMessage: 'No user with that ID exists.'
         })
-        return
+        return Promise.reject(null)
       }
       if (record.id !== user.id && record.level >= user.level) {
         res.status(401).json({
           success: false,
           errorMessage: 'Unauthorized.'
         })
-        return
+        return Promise.reject(null)
       }
       const payload: ?UpdateUserPayload = parseUpdateUserPayload(req.body)
       if (!payload) {
@@ -168,7 +171,7 @@ export default class UserRouter {
           success: false,
           errorMessage: 'Invalid update user payload.'
         })
-        return
+        return Promise.reject(null)
       }
       return this.dataStore.updateUser(record.id, payload)
     })
@@ -181,6 +184,9 @@ export default class UserRouter {
       })
     })
     .catch(error => {
+      if (!error) {
+        return
+      }
       this.logger('UserRouter updateById Error: ' + error)
       res.status(500).json({
         success: false,
@@ -205,14 +211,14 @@ export default class UserRouter {
           success: false,
           errorMessage: 'No user with that ID exists.'
         })
-        return
+        return Promise.reject(null)
       }
       if (record.id !== user.id && record.level >= user.level) {
         res.status(401).json({
           success: false,
           errorMessage: 'Unauthorized.'
         })
-        return
+        return Promise.reject(null)
       }
       return this.dataStore.deleteUser(record.id)
     })
@@ -225,6 +231,9 @@ export default class UserRouter {
       })
     })
     .catch(error => {
+      if (!error) {
+        return
+      }
       this.logger('UserRouter removeById Error: ' + error)
       res.status(500).json({
         success: false,

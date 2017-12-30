@@ -324,29 +324,68 @@ describe('User Routes', () => {
         .then(res => expect(res.body).toBeInstanceOf(Object))
     })
 
-    // it('should return success if token 1 is used on ID 1', () => {
-    //
-    // })
-    //
-    // it('should return 401 if token 1 is used on ID 2', () => {
-    //
-    // })
-    //
-    // it('should return 401 if token 1 is used on ID 3', () => {
-    //
-    // })
-    //
-    // it('should return 401 if token 2 is used on ID 3', () => {
-    //
-    // })
-    //
-    // it('should return success if token 2 is used on ID 1', () => {
-    //
-    // })
-    //
-    // it('should return success if token 3 is used on ID 2', () => {
-    //
-    // })
+    it('should return success if token 1 is used on ID 1', () => {
+      const updateUserPayload: UpdateUserPayload = { email: "miraan@gmail.com" }
+      return request(app).put('/api/v1/user/1')
+        .set('Authorization', 'Bearer token1')
+        .send(updateUserPayload)
+        .expect(200)
+        .then(res => {
+          expect(res.body.success).toBe(true)
+          const returnedUser: User = res.body.content.user
+          expect(returnedUser.email).toEqual(updateUserPayload.email)
+        })
+    })
+
+    it('should return 401 if token 1 is used on ID 2', () => {
+      return request(app).put('/api/v1/user/2')
+        .set('Authorization', 'Bearer token1')
+        .send({ email: "miraan@gmail.com" })
+        .expect(401)
+        .then(res => expect(res.body.success).toBe(false))
+    })
+
+    it('should return 401 if token 1 is used on ID 3', () => {
+      return request(app).put('/api/v1/user/3')
+        .set('Authorization', 'Bearer token1')
+        .send({ email: "miraan@gmail.com" })
+        .expect(401)
+        .then(res => expect(res.body.success).toBe(false))
+    })
+
+    it('should return 401 if token 2 is used on ID 3', () => {
+      return request(app).put('/api/v1/user/3')
+        .set('Authorization', 'Bearer token2')
+        .send({ email: "miraan@gmail.com" })
+        .expect(401)
+        .then(res => expect(res.body.success).toBe(false))
+    })
+
+    it('should return success if token 2 is used on ID 1', () => {
+      const updateUserPayload: UpdateUserPayload = { email: "john@gmail.com" }
+      return request(app).put('/api/v1/user/1')
+        .set('Authorization', 'Bearer token2')
+        .send(updateUserPayload)
+        .expect(200)
+        .then(res => {
+          expect(res.body.success).toBe(true)
+          const returnedUser: User = res.body.content.user
+          expect(returnedUser.email).toEqual(updateUserPayload.email)
+        })
+    })
+
+    it('should return success if token 3 is used on ID 2', () => {
+      const updateUserPayload: UpdateUserPayload = { email: "john@gmail.com" }
+      return request(app).put('/api/v1/user/2')
+        .set('Authorization', 'Bearer token3')
+        .send(updateUserPayload)
+        .expect(200)
+        .then(res => {
+          expect(res.body.success).toBe(true)
+          const returnedUser: User = res.body.content.user
+          expect(returnedUser.email).toEqual(updateUserPayload.email)
+        })
+    })
 
   })
 

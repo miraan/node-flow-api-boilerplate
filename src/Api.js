@@ -41,17 +41,22 @@ export default class Api {
     passport.use(new Strategy((token, cb) => {
       this.tokenStore.getUserId(token).then(userId => {
         if (!userId) {
-          return cb(null, false)
+          cb(null, false)
+          return Promise.reject(null)
         }
         return this.dataStore.getUserById(userId)
       })
       .then(user => {
         if (!user) {
-          return cb('Authentication Error: No user found for valid token.')
+          cb('Authentication Error: No user found for valid token.')
+          return Promise.reject(null)
         }
-        return cb(null, user)
+        cb(null, user)
       })
       .catch(error => {
+        if (!error) {
+          return
+        }
         return cb('Authentication Error: ' + error)
       })
     }))
