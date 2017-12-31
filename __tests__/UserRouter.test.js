@@ -71,7 +71,6 @@ DataStore.mockImplementation(() => {
         id: newUserId,
         ...payload,
       }
-      mockUserData.push(newUser)
       return Promise.resolve(newUser)
     }),
     updateUser: jest.fn().mockImplementation((userId, payload) => {
@@ -167,14 +166,20 @@ describe('User Routes', () => {
       return request(app).get('/api/v1/user/')
         .set('Authorization', 'Bearer token2')
         .expect(200)
-        .then(res => expect(res.body.content.users).toEqual(mockUserData))
+        .then(res => {
+          expect(res.body.success).toBe(true)
+          expect(res.body.content.users).toEqual(mockUserData)
+        })
     })
 
     it('should return an array of all users if token 3 is used', () => {
       return request(app).get('/api/v1/user/')
         .set('Authorization', 'Bearer token3')
         .expect(200)
-        .then(res => expect(res.body.content.users).toEqual(mockUserData))
+        .then(res => {
+          expect(res.body.success).toBe(true)
+          expect(res.body.content.users).toEqual(mockUserData)
+        })
     })
 
   })
@@ -384,6 +389,15 @@ describe('User Routes', () => {
           const returnedUser: User = res.body.content.user
           expect(returnedUser.email).toEqual(updateUserPayload.email)
         })
+    })
+
+    it('should return 404 if token 3 is used with invalid payload', () => {
+      const invalidPayload = { email1: "john@gmail.com" }
+      return request(app).put('/api/v1/user/1')
+        .set('Authorization', 'Bearer token3')
+        .send(invalidPayload)
+        .expect(400)
+        .then(res => expect(res.body.success).toBe(false))
     })
 
   })

@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "DEBUG=\"node-flow-api:*\" node build/index.js",
-    "test": "jest"
+    "test": "jest --verbose"
   },
   "author": "",
   "license": "ISC",

@@ -29,7 +29,8 @@ export default class TripRouter {
     this.router.get('/me', passportBearerAuthenticated, this.getOwn)
     this.router.get('/', passportBearerAuthenticated, this.getAll)
     this.router.get('/:id', passportBearerAuthenticated, this.getById)
-    this.router.post('/', passportBearerAuthenticated, this.postOne)
+    this.router.post('/', passportBearerAuthenticated, this.create)
+    this.router.post('/me', passportBearerAuthenticated, this.createOwn)
     this.router.put('/:id', passportBearerAuthenticated, this.updateById)
     this.router.delete('/:id', passportBearerAuthenticated, this.removeById)
   }
@@ -116,7 +117,7 @@ export default class TripRouter {
     })
   }
 
-  postOne = (req: $Request, res: $Response) => {
+  createOwn = (req: $Request, res: $Response) => {
     const user: User = req.user
     const payload: ?CreateTripPayload = parseCreateTripPayload(req.body)
     if (!payload) {
@@ -135,7 +136,50 @@ export default class TripRouter {
       })
     })
     .catch(error => {
-      this.logger('TripRouter postOne Error: ' + error)
+      this.logger('TripRouter createOwn Error: ' + error)
+      res.status(500).json({
+        success: false,
+        errorMessage: 'Error creating trip.'
+      })
+    })
+  }
+
+  create = (req: $Request, res: $Response) => {
+    const user: User = req.user
+    if (!user.level || user.level < 3) {
+      res.status(401).json({
+        success: false,
+        errorMessage: 'Unauthorized.'
+      })
+      return
+    }
+    const userId = req.body.userId
+    if (!userId) {
+      res.status(400).json({
+        success: false,
+        errorMessage: 'userId for new trip required for this endpoint.'
+      })
+      return
+    }
+    delete req.body.userId
+    const payload: ?CreateTripPayload = parseCreateTripPayload(req.body)
+    if (!payload) {
+      res.status(400).json({
+        success: false,
+        errorMessage: 'Invalid create trip payload.'
+      })
+      return
+    }
+    this.dataStore.createTrip(userId, payload).then(trip => {
+      res.status(200).json({
+        success: true,
+        content: {
+          trip: trip
+        }
+      })
+    })
+    .catch(error => {
+      this.logger('TripRouter create Error: ' + error)
       res.status(500).json({
         success: false,
         errorMessage: 'Error creating trip.'
