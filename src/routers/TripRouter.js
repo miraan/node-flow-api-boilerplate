@@ -126,96 +126,108 @@ export default class TripRouter {
       })
       return
     }
-    const newTrip: Trip = {
-      ...payload,
-      id: genId(trips),
-      userId: user.id,
-    }
-    trips.push(newTrip)
-    res.status(200).json({
-      success: true,
-      content: {
-        trip: newTrip
-      }
+    this.dataStore.createTrip(user.id, payload).then(trip => {
+      res.status(200).json({
+        success: true,
+        content: {
+          trip: trip
+        }
+      })
     })
-    this.saveTripsFile()
+    .catch(error => {
+      this.logger('TripRouter postOne Error: ' + error)
+      res.status(500).json({
+        success: false,
+        errorMessage: 'Error creating trip.'
+      })
+    })
   }
 
   updateById = (req: $Request, res: $Response) => {
     const user: User = req.user
     const id = parseInt(req.params.id, 10)
-    const trip: Trip = trips.find(trip => trip.id === id)
-    if (!trip) {
-      res.status(400).json({
-        success: false,
-        errorMessage: 'No trip with that ID exists.'
-      })
-      return
-    }
-    if (user.id !== trip.userId && (!user.level || user.level < 3)) {
-      res.status(401).json({
-        success: false,
-        errorMessage: 'Unauthorized.'
-      })
-      return
-    }
-    const payload: ?UpdateTripPayload = parseUpdateTripPayload(req.body)
-    if (!payload) {
-      res.status(400).json({
-        success: false,
-        errorMessage: 'Invalid update trip payload.'
-      })
-      return
-    }
-    // $FlowFixMe
-    Object.assign(trip, payload)
-    res.status(200).json({
-      success: true,
-      content: {
-        trip: trip
+    this.dataStore.getTripById(id).then(trip => {
+      if (!trip) {
+        res.status(400).json({
+          success: false,
+          errorMessage: 'No trip with that ID exists.'
+        })
+        return Promise.reject(null)
       }
+      if (user.id !== trip.userId && (!user.level || user.level < 3)) {
+        res.status(401).json({
+          success: false,
+          errorMessage: 'Unauthorized.'
+        })
+        return Promise.reject(null)
+      }
+      const payload: ?UpdateTripPayload = parseUpdateTripPayload(req.body)
+      if (!payload) {
+        res.status(400).json({
+          success: false,
+          errorMessage: 'Invalid update trip payload.'
+        })
+        return Promise.reject(null)
+      }
+      return this.dataStore.updateTrip(trip.id, payload)
     })
-    this.saveTripsFile()
+    .then(trip => {
+      res.status(200).json({
+        success: true,
+        content: {
+          trip: trip
+        }
+      })
+    })
+    .catch(error => {
+      if (!error) {
+        return
+      }
+      this.logger('TripRouter updateById Error: ' + error)
+      res.status(500).json({
+        success: false,
+        errorMessage: 'Error updating trip.'
+      })
+    })
   }
 
   removeById = (req: $Request, res: $Response) => {
     const user: User = req.user
     const id = parseInt(req.params.id, 10)
-    const tripIndex: number = trips.findIndex(trip => trip.id === id)
-    if (tripIndex === -1) {
-      res.status(400).json({
-        success: false,
-        errorMessage: 'No trip with that ID exists.'
-      })
-      return
-    }
-    const trip: Trip = trips[tripIndex]
-    if (user.id !== trip.userId && (!user.level || user.level < 3)) {
-      res.status(401).json({
-        success: false,
-        errorMessage: 'Unauthorized.'
-      })
-      return
-    }
-    const deletedTrip = trips.splice(tripIndex, 1)[0]
-    res.status(200).json({
-      success: true,
-      content: {
-        trip: deletedTrip
+    this.dataStore.getTripById(id).then(trip => {
+      if (!trip) {
+        res.status(400).json({
+          success: false,
+          errorMessage: 'No trip with that ID exists.'
+        })
+        return Promise.reject(null)
       }
+      if (user.id !== trip.userId && (!user.level || user.level < 3)) {
+        res.status(401).json({
+          success: false,
+          errorMessage: 'Unauthorized.'
+        })
+        return Promise.reject(null)
+      }
+      return this.dataStore.deleteTrip(trip.id)
     })
-    this.saveTripsFile()
-  }
-
-  saveTripsFile = () => {
-    saveItems(trips, 'trips.json')
-    .then(writePath => {
-      this.logger(`Trips updated. Written to:\n\t` +
-        `${path.relative(path.join(__dirname, '..', '..'), writePath)}`)
+    .then(deletedTrip => {
+      res.status(200).json({
+        success: true,
+        content: {
+          trip: deletedTrip
+        }
+      })
     })
-    .catch(err => {
-      this.logger('Error writing to trips file.')
-      this.logger(err.stack)
+    .catch(error => {
+      if (!error) {
+        return
+      }
+      this.logger('TripRouter removeById Error: ' + error)
+      res.status(500).json({
+        success: false,
+        errorMessage: 'Error deleting trip.'
+      })
     })
   }
 }

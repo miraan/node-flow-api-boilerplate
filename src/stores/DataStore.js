@@ -121,11 +121,13 @@ export default class DataStore {
     })
   }
 
-  createTrip: CreateTripPayload => Promise<Trip> = (payload: CreateTripPayload) => {
+  createTrip: (number, CreateTripPayload) => Promise<Trip> =
+  (userId: number, payload: CreateTripPayload) => {
     return new Promise((resolve, reject) => {
       const trip: Trip = {
         ...payload,
         id: genId(trips),
+        userId: userId,
       }
       trips.push(trip)
       this._saveTrips().then(writePath => {
