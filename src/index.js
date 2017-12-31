@@ -5,7 +5,7 @@ import debug from 'debug'
 import ServerConfigurationObject from './configuration'
 import TokenStore from './stores/TokenStore'
 import DataStore from './stores/DataStore'
-import FacebookClient from '../FacebookClient'
+import FacebookClient from './FacebookClient'
 import Api from './Api'
 
 import type { Debugger } from 'debug'

@@ -2,9 +2,11 @@
 
 import users from '../../data/users'
 import trips from '../../data/trips'
+import mongoose from 'mongoose'
 import path from 'path'
 import _ from 'lodash'
 import { saveItems, genId } from '../util/save'
+import UserModel from '../mongoose/UserModel'
 
 import type { Debugger } from 'debug'
 import type { User, CreateUserPayload, UpdateUserPayload, Trip,
@@ -15,6 +17,31 @@ export default class DataStore {
 
   constructor(logger: Debugger) {
     this.logger = logger
+    mongoose.connect('mongodb://127.0.0.1:27017/test?authSource=admin', {
+      user: 'admin',
+      pass: 'password',
+    })
+    const db = mongoose.connection
+    db.on('error', error => this.logger('Mongoose Connection Error: ' + error))
+    db.once('open', () => {
+      this.logger('Mongoose Connected Successfully.')
+      var testUser = new UserModel({
+        firstName: 'Miraan',
+        lastName: 'Tabrez',
+        facebookId: 'fakefacebookid',
+        facebookAccessToken: 'fakeaccesstoken',
+        email: 'miraan@tabrez.com',
+        level: 3,
+      })
+      testUser.save((error, savedUser) => {
+        if (error) {
+          console.log('Test user save error: ' + error)
+          return
+        }
+        console.log('Test user saved')
+        console.log(savedUser)
+      })
+    })
   }
 
   getUsers: () => Promise<Array<User>> = () => {
