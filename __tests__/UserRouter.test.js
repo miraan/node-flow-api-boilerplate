@@ -16,7 +16,7 @@ import type { User, CreateUserPayload, UpdateUserPayload } from '../src/util/typ
 
 const mockUserData: Array<User> = [
   {
-    id: 1,
+    id: '1',
     firstName: "John",
     lastName: "Smith",
     facebookId: "432432",
@@ -25,7 +25,7 @@ const mockUserData: Array<User> = [
     level: 1,
   },
   {
-    id: 2,
+    id: '2',
     firstName: "Joe",
     lastName: "Bloggs",
     facebookId: "34324",
@@ -34,7 +34,7 @@ const mockUserData: Array<User> = [
     level: 2,
   },
   {
-    id: 3,
+    id: '3',
     firstName: "Miraan",
     lastName: "Tabrez",
     facebookId: "324354654354",
@@ -45,9 +45,9 @@ const mockUserData: Array<User> = [
 ]
 
 const mockTokenStoreData = {
-  'token1': 1,
-  'token2': 2,
-  'token3': 3,
+  'token1': '1',
+  'token2': '2',
+  'token3': '3',
 }
 
 TokenStore.mockImplementation(() => {
@@ -67,7 +67,7 @@ DataStore.mockImplementation(() => {
       return Promise.resolve(mockUserData.find(user => user.id === userId))
     }),
     createUser: jest.fn().mockImplementation(payload => {
-      const newUserId = _.maxBy(mockUserData, user => user.id).id + 1
+      const newUserId = (parseInt(_.maxBy(mockUserData, user => user.id).id) + 1).toString()
       const newUser: User = {
         id: newUserId,
         ...payload,
@@ -299,7 +299,7 @@ describe('User Routes', () => {
         .then(res => {
           expect(res.body.success).toBe(true)
           const returnedUser: User = res.body.content.user
-          expect(returnedUser.id).toBeGreaterThan(3)
+          expect(returnedUser.id).toEqual('4')
           delete returnedUser.id
           expect(returnedUser).toEqual(createUserPayload)
         })
@@ -313,7 +313,7 @@ describe('User Routes', () => {
         .then(res => {
           expect(res.body.success).toBe(true)
           const returnedUser: User = res.body.content.user
-          expect(returnedUser.id).toBeGreaterThan(3)
+          expect(returnedUser.id).toEqual('4')
           delete returnedUser.id
           expect(returnedUser).toEqual(createUserPayload)
         })

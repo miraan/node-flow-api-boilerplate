@@ -17,7 +17,7 @@ import type { User, FacebookProfile } from '../src/util/types'
 
 const mockUserData: Array<User> = [
   {
-    id: 1,
+    id: '1',
     firstName: 'John',
     lastName: 'Smith',
     facebookId: 'facebookId1',
@@ -67,7 +67,7 @@ DataStore.mockImplementation(() => {
       return Promise.resolve(mockUserData.find(user => user.facebookId === facebookId))
     }),
     createUser: jest.fn().mockImplementation(payload => {
-      const newUserId = _.maxBy(mockUserData, user => user.id).id + 1
+      const newUserId = (parseInt(_.maxBy(mockUserData, user => user.id).id) + 1).toString()
       const newUser: User = {
         id: newUserId,
         ...payload,
@@ -155,7 +155,7 @@ describe('Login Routes', () => {
           expect(res.body.content.token).toEqual(expect.anything())
           const returnedNewUser: User = res.body.content.user
           const expectedNewUser: User = {
-            id: 2,
+            id: '2',
             facebookAccessToken: 'facebookLongToken2',
             facebookId: 'facebookId2',
             firstName: 'Miraan',

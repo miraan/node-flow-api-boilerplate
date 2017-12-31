@@ -3,7 +3,7 @@
 type ToOptionalType = <V>(V) => ?V
 
 export type User = {
-  id: number,
+  id: string,
   firstName: string,
   lastName: string,
   facebookId: string,
@@ -13,7 +13,7 @@ export type User = {
 }
 
 export type CreateUserPayload = $Diff<User, {
-  id: number,
+  id: string,
 }>
 
 export type UpdateUserPayload = {
@@ -28,8 +28,8 @@ export type FacebookProfile = {
 }
 
 export type Trip = {
-  id: number,
-  userId: number,
+  id: string,
+  userId: string,
   destination: string,
   startDate: string,
   endDate: string,
@@ -37,8 +37,8 @@ export type Trip = {
 }
 
 export type CreateTripPayload = $Diff<Trip, {
-  id: number,
-  userId: number,
+  id: string,
+  userId: string,
 }>
 
 export type UpdateTripPayload = {

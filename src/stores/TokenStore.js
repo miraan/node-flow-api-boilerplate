@@ -20,12 +20,12 @@ export default class TokenStore {
       this.logger(`Redis Client Error Event ${error}`))
   }
 
-  setToken = (token: string, userId: number) => {
+  setToken = (token: string, userId: string) => {
     // $FlowFixMe
     this.redisClient.set(token, userId, 'EX', ServerConfigurationObject.tokenExpireTimeSeconds)
   }
 
-  getUserId: (string => Promise<?number>) = (token: string) => {
+  getUserId: (string => Promise<?string>) = (token: string) => {
     return new Promise((resolve, reject) => {
       // $FlowFixMe
       this.redisClient.get(token, (error, value) => {
@@ -37,7 +37,7 @@ export default class TokenStore {
           resolve(null)
           return
         }
-        resolve(parseInt(value, 10))
+        resolve(value)
       })
     })
   }

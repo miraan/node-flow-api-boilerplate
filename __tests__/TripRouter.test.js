@@ -16,7 +16,7 @@ import type { User, Trip, CreateTripPayload, UpdateTripPayload } from '../src/ut
 
 const mockUserData: Array<User> = [
   {
-    id: 1,
+    id: '1',
     firstName: "John",
     lastName: "Smith",
     facebookId: "432432",
@@ -25,7 +25,7 @@ const mockUserData: Array<User> = [
     level: 1,
   },
   {
-    id: 2,
+    id: '2',
     firstName: "Joe",
     lastName: "Bloggs",
     facebookId: "34324",
@@ -34,7 +34,7 @@ const mockUserData: Array<User> = [
     level: 2,
   },
   {
-    id: 3,
+    id: '3',
     firstName: "Miraan",
     lastName: "Tabrez",
     facebookId: "324354654354",
@@ -46,32 +46,32 @@ const mockUserData: Array<User> = [
 
 const mockTripsData: Array<Trip> = [
   {
-    id: 1,
-    userId: 1,
+    id: '1',
+    userId: '1',
     destination: "London",
     startDate: "2012-04-23T18:25:43.511Z",
     endDate: "2012-04-25T18:25:43.511Z",
     comment: "Excited for London!",
   },
   {
-    id: 2,
-    userId: 2,
+    id: '2',
+    userId: '2',
     destination: "Paris",
     startDate: "2013-04-23T18:25:43.511Z",
     endDate: "2013-04-25T18:25:43.511Z",
     comment: "Excited for Paris!",
   },
   {
-    id: 3,
-    userId: 3,
+    id: '3',
+    userId: '3',
     destination: "Tokyo",
     startDate: "2015-04-23T18:25:43.511Z",
     endDate: "2015-04-25T18:25:43.511Z",
     comment: "Excited for Tokyo!",
   },
   {
-    id: 4,
-    userId: 1,
+    id: '4',
+    userId: '1',
     destination: "Bali",
     startDate: "2016-04-23T18:25:43.511Z",
     endDate: "2016-04-25T18:25:43.511Z",
@@ -80,9 +80,9 @@ const mockTripsData: Array<Trip> = [
 ]
 
 const mockTokenStoreData = {
-  'token1': 1,
-  'token2': 2,
-  'token3': 3,
+  'token1': '1',
+  'token2': '2',
+  'token3': '3',
 }
 
 TokenStore.mockImplementation(() => {
@@ -108,7 +108,7 @@ DataStore.mockImplementation(() => {
       return Promise.resolve(mockTripsData.find(trip => trip.id === tripId))
     }),
     createTrip: jest.fn().mockImplementation((userId, payload) => {
-      const newTripId = _.maxBy(mockTripsData, trip => trip.id).id + 1
+      const newTripId = (parseInt(_.maxBy(mockTripsData, trip => trip.id).id) + 1).toString()
       const newTrip: Trip = {
         id: newTripId,
         userId: userId,
@@ -168,7 +168,7 @@ describe('Trip Routes', () => {
         .expect(200)
         .then(res => {
           expect(res.body.success).toBe(true)
-          const user1Trips = _.filter(mockTripsData, trip => trip.userId === 1)
+          const user1Trips = _.filter(mockTripsData, trip => trip.userId === '1')
           expect(res.body.content.trips).toEqual(user1Trips)
         })
     })
@@ -179,7 +179,7 @@ describe('Trip Routes', () => {
         .expect(200)
         .then(res => {
           expect(res.body.success).toBe(true)
-          const user2Trips = _.filter(mockTripsData, trip => trip.userId === 2)
+          const user2Trips = _.filter(mockTripsData, trip => trip.userId === '2')
           expect(res.body.content.trips).toEqual(user2Trips)
         })
     })
@@ -331,7 +331,7 @@ describe('Trip Routes', () => {
         .then(res => {
           expect(res.body.success).toBe(true)
           const returnedTrip: Trip = res.body.content.trip
-          expect(returnedTrip.id).toBeGreaterThan(4)
+          expect(returnedTrip.id).toEqual('5')
           delete returnedTrip.id
           expect(returnedTrip).toEqual(createTripPayload)
         })
@@ -387,9 +387,9 @@ describe('Trip Routes', () => {
         .then(res => {
           expect(res.body.success).toBe(true)
           const returnedTrip: Trip = res.body.content.trip
-          expect(returnedTrip.id).toBeGreaterThan(4)
+          expect(returnedTrip.id).toEqual('5')
           delete returnedTrip.id
-          expect(returnedTrip.userId).toEqual(1)
+          expect(returnedTrip.userId).toEqual('1')
           delete returnedTrip.userId
           expect(returnedTrip).toEqual(createTripPayload)
         })
@@ -403,9 +403,9 @@ describe('Trip Routes', () => {
         .then(res => {
           expect(res.body.success).toBe(true)
           const returnedTrip: Trip = res.body.content.trip
-          expect(returnedTrip.id).toBeGreaterThan(4)
+          expect(returnedTrip.id).toEqual('5')
           delete returnedTrip.id
-          expect(returnedTrip.userId).toEqual(2)
+          expect(returnedTrip.userId).toEqual('2')
           delete returnedTrip.userId
           expect(returnedTrip).toEqual(createTripPayload)
         })

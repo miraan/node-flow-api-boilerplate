@@ -71,7 +71,7 @@ export default class UserRouter {
 
   getById = (req: $Request, res: $Response) => {
     const user: User = req.user
-    const id = parseInt(req.params.id, 10)
+    const id = req.params.id
     if (user.id !== id && (!user.level || user.level < 2)) {
       res.status(401).json({
         success: false,
@@ -142,7 +142,7 @@ export default class UserRouter {
 
   updateById = (req: $Request, res: $Response) => {
     const user: User = req.user
-    const id = parseInt(req.params.id, 10)
+    const id = req.params.id
     if (user.id !== id && (!user.level || user.level < 2)) {
       res.status(401).json({
         success: false,
@@ -197,7 +197,7 @@ export default class UserRouter {
 
   removeById = (req: $Request, res: $Response) => {
     const user: User = req.user
-    const id = parseInt(req.params.id, 10)
+    const id = req.params.id
     if (user.id !== id && (!user.level || user.level < 2)) {
       res.status(401).json({
         success: false,

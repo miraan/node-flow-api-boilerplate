@@ -50,7 +50,7 @@ export default class DataStore {
     })
   }
 
-  getUserById: number => Promise<?User> = (userId: number) => {
+  getUserById: string => Promise<?User> = (userId: string) => {
     return new Promise((resolve, reject) => {
       const user: ?User = users.find(user => user.id === userId)
       if (!user) {
@@ -88,8 +88,8 @@ export default class DataStore {
     })
   }
 
-  updateUser: (number, UpdateUserPayload) => Promise<User> =
-  (userId: number, payload: UpdateUserPayload) => {
+  updateUser: (string, UpdateUserPayload) => Promise<User> =
+  (userId: string, payload: UpdateUserPayload) => {
     return new Promise((resolve, reject) => {
       const user: ?User = users.find(user => user.id === userId)
       if (!user) {
@@ -107,7 +107,7 @@ export default class DataStore {
     })
   }
 
-  deleteUser: number => Promise<User> = (userId: number) => {
+  deleteUser: string => Promise<User> = (userId: string) => {
     return new Promise((resolve, reject) => {
       const index: number = users.findIndex(user => user.id === userId)
       if (index === -1) {
@@ -130,14 +130,14 @@ export default class DataStore {
     })
   }
 
-  getTripsByUserId: number => Promise<Array<Trip>> = (userId: number) => {
+  getTripsByUserId: string => Promise<Array<Trip>> = (userId: string) => {
     return new Promise((resolve, reject) => {
       const userTrips: Array<Trip> = _.filter(trips, trip => trip.userId === userId)
       resolve(userTrips)
     })
   }
 
-  getTripById: number => Promise<?Trip> = (tripId: number) => {
+  getTripById: string => Promise<?Trip> = (tripId: string) => {
     return new Promise((resolve, reject) => {
       const trip: ?Trip = trips.find(trip => trip.id === tripId)
       if (!trip) {
@@ -148,8 +148,8 @@ export default class DataStore {
     })
   }
 
-  createTrip: (number, CreateTripPayload) => Promise<Trip> =
-  (userId: number, payload: CreateTripPayload) => {
+  createTrip: (string, CreateTripPayload) => Promise<Trip> =
+  (userId: string, payload: CreateTripPayload) => {
     return new Promise((resolve, reject) => {
       const trip: Trip = {
         ...payload,
@@ -166,8 +166,8 @@ export default class DataStore {
     })
   }
 
-  updateTrip: (number, UpdateTripPayload) => Promise<Trip> =
-  (tripId: number, payload: UpdateTripPayload) => {
+  updateTrip: (string, UpdateTripPayload) => Promise<Trip> =
+  (tripId: string, payload: UpdateTripPayload) => {
     return new Promise((resolve, reject) => {
       const trip: ?Trip = trips.find(trip => trip.id === tripId)
       if (!trip) {
@@ -185,7 +185,7 @@ export default class DataStore {
     })
   }
 
-  deleteTrip: number => Promise<Trip> = (tripId: number) => {
+  deleteTrip: string => Promise<Trip> = (tripId: string) => {
     return new Promise((resolve, reject) => {
       const index: number = trips.findIndex(trip => trip.id === tripId)
       if (index === -1) {

@@ -82,7 +82,7 @@ export default class TripRouter {
 
   getById = (req: $Request, res: $Response) => {
     const user: User = req.user
-    const id = parseInt(req.params.id, 10)
+    const id = req.params.id
     this.dataStore.getTripById(id).then(trip => {
       if (!trip) {
         res.status(400).json({
@@ -189,7 +189,7 @@ export default class TripRouter {
 
   updateById = (req: $Request, res: $Response) => {
     const user: User = req.user
-    const id = parseInt(req.params.id, 10)
+    const id = req.params.id
     this.dataStore.getTripById(id).then(trip => {
       if (!trip) {
         res.status(400).json({
@@ -237,7 +237,7 @@ export default class TripRouter {
 
   removeById = (req: $Request, res: $Response) => {
     const user: User = req.user
-    const id = parseInt(req.params.id, 10)
+    const id = req.params.id
     this.dataStore.getTripById(id).then(trip => {
       if (!trip) {
         res.status(400).json({
