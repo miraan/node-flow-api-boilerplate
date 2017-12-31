@@ -3,7 +3,7 @@
 This branch contains a Node.JS Express Server with Flow type-checking
 exposing a RESTful API with CRUD examples and user authentication.
 
-The CRUD examples are of Users and Produce.
+The CRUD examples are of Users and Trips.
 
 User authentication is via the Facebook Graph API and Passport.
 
@@ -37,7 +37,7 @@ Level 3 users can view and change all records.
 Stack used: Node.JS, Express, Flow, Babel + ES Preset, Gulp,
 Passport (Bearer Token Strategy), Facebook Node SDK (fb), Redis
 
-## All routes
+## All User Routes
 
 `GET /api/v1/login/facebook?facebookAccessToken=xxxxx`: Authenticates and returns a token.
 
@@ -53,6 +53,27 @@ must be present.
 `PUT /api/v1/user/xxx`: Updates user with ID `xxx` with JSON data in request body
 
 `DELETE /api/v1/user/xxx`: Deletes a user with ID `xxx`
+
+## All Trip Routes
+
+`GET /api/v1/trip/me`: Gets own trips.
+
+`GET /api/v1/trip/`: Gets all trips.
+
+`GET /api/v1/trip/xxx`: Gets trip with ID xxx.
+
+`POST /api/v1/trip/`: Creates a trip with arbitrary user ID.
+
+`POST /api/v1/trip/me`: Creates a trip with own user ID.
+
+`PUT /api/v1/trip/xxx`: Updates trip with ID xxx.
+
+`DELETE /api/v1/trip/xxx`: Deletes trip with ID xxx.
+
+## Unit Tests
+
+Unit tests are written for the Express Routers using Jest and supertest. Tests
+can be found in the directory `__tests__`.
 
 ## Prerequisites
 
