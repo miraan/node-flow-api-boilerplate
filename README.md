@@ -28,18 +28,21 @@ Future client requests can be authenticated if the client passes this token in t
 Each user has an associated `level` which governs their permissions to perform
 certain actions.
 
-Level 1 users can only view and change their own records.
+Level 1 users can only view and change their own user record and trip records.
 
-Level 2 users can view all records, but only change records of level 1 users.
+Level 2 users can view all user records, change their own trip records and change
+all user records for level 1 users.
 
-Level 3 users can view and change all records.
+Level 3 users can view and change all user and trip records.
 
 Stack used: Node.JS, Express, Flow, Babel + ES Preset, Gulp,
-Passport (Bearer Token Strategy), Facebook Node SDK (fb), Redis
+Passport (Bearer Token Strategy), Facebook Node SDK (fb), Redis, Jest, supertest
 
-## All User Routes
+## Login Routes
 
 `GET /api/v1/login/facebook?facebookAccessToken=xxxxx`: Authenticates and returns a token.
+
+## User Routes
 
 `GET /api/v1/user/me`: Returns own profile.
 
@@ -54,7 +57,7 @@ must be present.
 
 `DELETE /api/v1/user/xxx`: Deletes a user with ID `xxx`
 
-## All Trip Routes
+## Trip Routes
 
 `GET /api/v1/trip/me`: Gets own trips.
 
