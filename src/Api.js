@@ -8,7 +8,6 @@ import { Strategy } from 'passport-http-bearer'
 import TokenStore from './stores/TokenStore'
 import DataStore from './stores/DataStore'
 
-import ProduceRouter from './routers/ProduceRouter'
 import LoginRouter from './routers/LoginRouter'
 import UserRouter from './routers/UserRouter'
 import TripRouter from './routers/TripRouter'
@@ -63,9 +62,6 @@ export default class Api {
   }
 
   initRoutes = () => {
-    const produceRouter = new ProduceRouter(this.logger)
-    this.express.use(produceRouter.path, produceRouter.router)
-
     const loginRouter = new LoginRouter(this.logger, this.tokenStore, this.dataStore)
     this.express.use(loginRouter.path, loginRouter.router)
 
