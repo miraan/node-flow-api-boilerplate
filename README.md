@@ -90,6 +90,7 @@ Clone the repository
 1. `npm install`
 2. `flow-typed install`
 3. `gulp` to watch files and automatically rebuild / flow type check
-4. `npm start` to start the server
-5. Develop and remember to run `flow-typed install` after adding a new
+4. `npm test` to run unit tests
+5. `npm start` to start the server
+6. Develop and remember to run `flow-typed install` after adding a new
 dependency with `npm install --save xxx`
