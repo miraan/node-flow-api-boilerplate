@@ -23,6 +23,7 @@ export default class LoginRouter {
     logger: Debugger,
     tokenStore: TokenStore,
     dataStore: DataStore,
+    facebookClient: FacebookClient,
     path: string = '/api/v1/login'
   ) {
     this.router = Router()
@@ -30,7 +31,7 @@ export default class LoginRouter {
     this.logger = logger
     this.tokenStore = tokenStore
     this.dataStore = dataStore
-    this.facebookClient = new FacebookClient()
+    this.facebookClient = facebookClient
     this.init()
   }
 
@@ -76,7 +77,8 @@ export default class LoginRouter {
       res.status(200).json({
         success: true,
         content: {
-          token: localToken
+          token: localToken,
+          user: user,
         }
       })
     })

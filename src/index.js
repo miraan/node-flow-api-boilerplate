@@ -5,6 +5,7 @@ import debug from 'debug'
 import ServerConfigurationObject from './configuration'
 import TokenStore from './stores/TokenStore'
 import DataStore from './stores/DataStore'
+import FacebookClient from '../FacebookClient'
 import Api from './Api'
 
 import type { Debugger } from 'debug'
@@ -19,7 +20,8 @@ declare interface ErrnoError extends Error {
 const logger: Debugger = debug(ServerConfigurationObject.loggerPrefix + ':')
 const tokenStore: TokenStore = new TokenStore(logger)
 const dataStore: DataStore = new DataStore(logger)
-const app: Api = new Api(logger, tokenStore, dataStore)
+const facebookClient: FacebookClient = new FacebookClient()
+const app: Api = new Api(logger, tokenStore, dataStore, facebookClient)
 const port: string | number = normalizePort(process.env.PORT)
 const server: Server = http.createServer(app.express)
 

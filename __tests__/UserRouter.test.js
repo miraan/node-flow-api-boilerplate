@@ -9,6 +9,7 @@ import _ from 'lodash'
 import Api from '../src/Api'
 import TokenStore from '../src/stores/TokenStore'
 import DataStore from '../src/stores/DataStore'
+import FacebookClient from '../src/FacebookClient'
 
 import type { Debugger } from 'debug'
 import type { User, CreateUserPayload, UpdateUserPayload } from '../src/util/types'
@@ -78,8 +79,7 @@ DataStore.mockImplementation(() => {
       if (!user) {
         return Promise.reject('No mock user with that ID.')
       }
-      Object.assign(user, payload)
-      return Promise.resolve(user)
+      return Promise.resolve(Object.assign({}, user, payload))
     }),
     deleteUser: jest.fn().mockImplementation(userId => {
       const user: ?User = mockUserData.find(user => user.id === userId)
@@ -94,7 +94,8 @@ DataStore.mockImplementation(() => {
 const logger: Debugger = debug('jest-logger:')
 const tokenStore: TokenStore = new TokenStore(logger)
 const dataStore: DataStore = new DataStore(logger)
-const app = new Api(logger, tokenStore, dataStore).express
+const facebookClient: FacebookClient = new FacebookClient()
+const app = new Api(logger, tokenStore, dataStore, facebookClient).express
 
 describe('User Routes', () => {
 

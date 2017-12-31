@@ -2,13 +2,6 @@
 
 type ToOptionalType = <V>(V) => ?V
 
-export type Produce = {
-  id: number,
-  name: string,
-  quantity: number,
-  price: number,
-}
-
 export type User = {
   id: number,
   firstName: string,
@@ -25,6 +18,13 @@ export type CreateUserPayload = $Diff<User, {
 
 export type UpdateUserPayload = {
   ...$ObjMap<CreateUserPayload, ToOptionalType>,
+}
+
+export type FacebookProfile = {
+  facebookId: string,
+  firstName: string,
+  lastName: string,
+  email: string,
 }
 
 export type Trip = {

@@ -7,6 +7,7 @@ import passport from 'passport'
 import { Strategy } from 'passport-http-bearer'
 import TokenStore from './stores/TokenStore'
 import DataStore from './stores/DataStore'
+import FacebookClient from './FacebookClient'
 
 import LoginRouter from './routers/LoginRouter'
 import UserRouter from './routers/UserRouter'
@@ -19,12 +20,19 @@ export default class Api {
   logger: Debugger
   tokenStore: TokenStore
   dataStore: DataStore
+  facebookClient: FacebookClient
 
-  constructor(logger: Debugger, tokenStore: TokenStore, dataStore: DataStore) {
+  constructor(
+    logger: Debugger,
+    tokenStore: TokenStore,
+    dataStore: DataStore,
+    facebookClient: FacebookClient
+  ) {
     this.express = express()
     this.logger = logger
     this.tokenStore = tokenStore
     this.dataStore = dataStore
+    this.facebookClient = facebookClient
     this.initMiddleware()
     this.initPassport()
     this.initRoutes()
@@ -62,7 +70,12 @@ export default class Api {
   }
 
   initRoutes = () => {
-    const loginRouter = new LoginRouter(this.logger, this.tokenStore, this.dataStore)
+    const loginRouter = new LoginRouter(
+      this.logger,
+      this.tokenStore,
+      this.dataStore,
+      this.facebookClient
+    )
     this.express.use(loginRouter.path, loginRouter.router)
 
     const userRouter = new UserRouter(this.logger, this.dataStore)

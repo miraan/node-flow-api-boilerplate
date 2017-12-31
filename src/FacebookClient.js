@@ -3,12 +3,7 @@
 import FB from 'fb'
 import ServerConfigurationObject from './configuration'
 
-type FacebookProfile = {
-  facebookId: string,
-  firstName: string,
-  lastName: string,
-  email: string,
-}
+import type { FacebookProfile } from './util/types'
 
 export default class FacebookClient {
   extendFacebookAccessToken(facebookAccessToken: string): Promise<string> {
