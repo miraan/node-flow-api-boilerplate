@@ -6,7 +6,6 @@ import _ from 'lodash'
 import DataStore from '../stores/DataStore'
 import passportBearerAuthenticated from '../util/passportBearerAuthenticated'
 import { parseCreateTripPayload, parseUpdateTripPayload } from '../util/parsers'
-import { saveItems, genId } from '../util/save'
 
 import type { Debugger } from 'debug'
 import type { User, Trip, CreateTripPayload, UpdateTripPayload } from '../util/types'

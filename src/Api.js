@@ -55,7 +55,7 @@ export default class Api {
       })
       .then(user => {
         if (!user) {
-          cb('Authentication Error: No user found for valid token.')
+          cb(null, false)
           return Promise.reject(null)
         }
         cb(null, user)

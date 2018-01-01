@@ -6,7 +6,6 @@ import crypto from 'crypto'
 import path from 'path'
 import TokenStore from '../stores/TokenStore'
 import DataStore from '../stores/DataStore'
-import { saveItems, genId } from '../util/save'
 
 import type { Debugger } from 'debug'
 import type { User, CreateUserPayload } from '../util/types'

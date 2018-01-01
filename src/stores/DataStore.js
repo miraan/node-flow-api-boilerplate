@@ -240,4 +240,19 @@ export default class DataStore {
       })
     })
   }
+
+  deleteAllUsers: () => Promise<*> = () => {
+    return UserModel.deleteMany({})
+  }
+
+  deleteAllTrips: () => Promise<*> = () => {
+    return TripModel.deleteMany({})
+  }
+
+  deleteAllData: () => Promise<*> = () => {
+    return Promise.all([
+      this.deleteAllUsers(),
+      this.deleteAllTrips(),
+    ])
+  }
 }

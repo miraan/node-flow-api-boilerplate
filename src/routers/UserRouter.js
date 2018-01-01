@@ -6,7 +6,6 @@ import _ from 'lodash'
 import DataStore from '../stores/DataStore'
 import passportBearerAuthenticated from '../util/passportBearerAuthenticated'
 import { parseCreateUserPayload, parseUpdateUserPayload } from '../util/parsers'
-import { saveItems, genId } from '../util/save'
 
 import type { Debugger } from 'debug'
 import type { User, CreateUserPayload, UpdateUserPayload } from '../util/types'
@@ -123,6 +122,7 @@ export default class UserRouter {
       })
       return
     }
+    payload.level = Math.min(payload.level, user.level)
     this.dataStore.createUser(payload).then(newUser => {
       res.status(200).json({
         success: true,
