@@ -1,4 +1,4 @@
-# Node.JS REST API with Facebook User Authentication Boilerplate
+# Node.JS RESTful CRUD API with Facebook User Authentication
 
 This branch contains a Node.JS Express Server with Flow type-checking
 exposing a RESTful API with CRUD examples and user authentication using the
