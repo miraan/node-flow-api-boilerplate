@@ -10,6 +10,12 @@ const ServerConfigurationObject: ServerConfiguration = {
   redisServerPort: 6379,
   facebookClientAppId: '419380475146250',
   facebookClientAppSecret: '03db5ff049e55538a5b38617c25d053c',
+  mongoDbHost: '127.0.0.1',
+  mongoDbPort: 27017,
+  mongoDbDatabaseName: 'test',
+  mongoDbAuthenticationDatabase: 'admin',
+  mongoDbUserName: 'admin',
+  mongoDbPassword: 'password',
 }
 
 export default ServerConfigurationObject

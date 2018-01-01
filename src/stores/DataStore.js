@@ -4,6 +4,7 @@ import mongoose from 'mongoose'
 mongoose.Promise = Promise
 import path from 'path'
 import _ from 'lodash'
+import ServerConfigurationObject from '../configuration'
 import UserModel from '../mongoose/UserModel'
 import TripModel from '../mongoose/TripModel'
 
@@ -16,9 +17,12 @@ export default class DataStore {
 
   constructor(logger: Debugger) {
     this.logger = logger
-    mongoose.connect('mongodb://127.0.0.1:27017/test?authSource=admin', {
-      user: 'admin',
-      pass: 'password',
+    mongoose.connect(`mongodb://${ServerConfigurationObject.mongoDbHost}:` +
+      `${ServerConfigurationObject.mongoDbPort}/` +
+      `${ServerConfigurationObject.mongoDbDatabaseName}` +
+      `?authSource=${ServerConfigurationObject.mongoDbAuthenticationDatabase}`, {
+      user: ServerConfigurationObject.mongoDbUserName,
+      pass: ServerConfigurationObject.mongoDbPassword,
     })
     const db = mongoose.connection
     db.on('error', error => this.logger('Mongoose Connection Error: ' + error))

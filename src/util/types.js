@@ -53,4 +53,10 @@ export type ServerConfiguration = {
   redisServerPort: number,
   facebookClientAppId: string,
   facebookClientAppSecret: string,
+  mongoDbHost: string,
+  mongoDbPort: number,
+  mongoDbDatabaseName: string,
+  mongoDbAuthenticationDatabase: string,
+  mongoDbUserName: string,
+  mongoDbPassword: string,
 }
