@@ -1,7 +1,9 @@
 # Node.JS REST API with Facebook User Authentication Boilerplate
 
 This branch contains a Node.JS Express Server with Flow type-checking
-exposing a RESTful API with CRUD examples and user authentication.
+exposing a RESTful API with CRUD examples and user authentication using the
+Facebook Graph API to verify Facebook access tokens sent from clients. Data
+storage is via MongoDB, and this project uses the mongoose npm package.
 
 The CRUD examples are of Users and Trips.
 
@@ -36,7 +38,8 @@ all user records for level 1 users.
 Level 3 users can view and change all user and trip records.
 
 Stack used: Node.JS, Express, Flow, Babel + ES Preset, Gulp,
-Passport (Bearer Token Strategy), Facebook Node SDK (fb), Redis, Jest, supertest
+Passport (Bearer Token Strategy), Facebook Node SDK (fb), Redis, MongoDB, mongoose,
+Jest, supertest
 
 ## Login Routes
 
@@ -73,10 +76,43 @@ must be present.
 
 `DELETE /api/v1/trip/xxx`: Deletes trip with ID xxx.
 
-## Unit Tests
+## Tests
 
-Unit tests are written for the Express Routers using Jest and supertest. Tests
-can be found in the directory `__tests__`.
+Unit tests and integration tests are written for the Express Routers using Jest
+and supertest. Tests can be found in the directory `__tests__`.
+
+## Database
+
+MongoDB is used to store records, and the mongoose npm package is used to
+interface with the DB.
+
+## Cache
+
+Redis is used to store user tokens to persist authenticated sessions via the API.
+
+## Configuring the project
+
+A `ServerConfiguration` object is exported from `src/configuration.js` which
+can be edited to configure the app. The object has the following Flow type:
+
+```
+type ServerConfiguration = {
+  defaultPort: number,
+  loggerPrefix: string,
+  tokenExpireTimeSeconds: number,
+  redisServerHost: string,
+  redisServerPort: number,
+  facebookClientAppId: string,
+  facebookClientAppSecret: string,
+  testUserFacebookAccessToken: string,
+  mongoDbHost: string,
+  mongoDbPort: number,
+  mongoDbDatabaseName: string,
+  mongoDbAuthenticationDatabase: string,
+  mongoDbUserName: string,
+  mongoDbPassword: string,
+}
+```
 
 ## Prerequisites
 
