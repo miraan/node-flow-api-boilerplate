@@ -1,12 +1,11 @@
 // @flow
 
-import users from '../../data/users'
-import trips from '../../data/trips'
 import mongoose from 'mongoose'
+mongoose.Promise = Promise
 import path from 'path'
 import _ from 'lodash'
-import { saveItems, genId } from '../util/save'
 import UserModel from '../mongoose/UserModel'
+import TripModel from '../mongoose/TripModel'
 
 import type { Debugger } from 'debug'
 import type { User, CreateUserPayload, UpdateUserPayload, Trip,
@@ -23,67 +22,72 @@ export default class DataStore {
     })
     const db = mongoose.connection
     db.on('error', error => this.logger('Mongoose Connection Error: ' + error))
-    db.once('open', () => {
-      this.logger('Mongoose Connected Successfully.')
-      var testUser = new UserModel({
-        firstName: 'Miraan',
-        lastName: 'Tabrez',
-        facebookId: 'fakefacebookid',
-        facebookAccessToken: 'fakeaccesstoken',
-        email: 'miraan@tabrez.com',
-        level: 3,
-      })
-      testUser.save((error, savedUser) => {
-        if (error) {
-          console.log('Test user save error: ' + error)
-          return
-        }
-        console.log('Test user saved')
-        console.log(savedUser)
-      })
-    })
+    db.once('open', () => this.logger('Mongoose Connected Successfully.'))
   }
 
   getUsers: () => Promise<Array<User>> = () => {
     return new Promise((resolve, reject) => {
-      resolve(users)
+      UserModel.find().then(userDocuments => {
+        const users = _.map(userDocuments, userDocument => userDocument.toUserType())
+        resolve(users)
+      })
+      .catch(error => {
+        reject('DataStore getUsers error: UserModel find error: ' + error)
+      })
     })
   }
 
   getUserById: string => Promise<?User> = (userId: string) => {
     return new Promise((resolve, reject) => {
-      const user: ?User = users.find(user => user.id === userId)
-      if (!user) {
-        resolve(null)
-        return
-      }
-      resolve(user)
+      UserModel.findById(userId).then(userDocument => {
+        if (!userDocument) {
+          resolve(null)
+          return Promise.reject(null)
+        }
+        resolve(userDocument.toUserType())
+      })
+      .catch(error => {
+        if (!error) {
+          return
+        }
+        reject('DataStore getUserById error: UserModel findById error: ' + error)
+      })
     })
   }
 
   getUserByFacebookId: string => Promise<?User> = (facebookId: string) => {
     return new Promise((resolve, reject) => {
-      const user: ?User = users.find(user => user.facebookId === facebookId)
-      if (!user) {
-        resolve(null)
-        return
-      }
-      resolve(user)
+      UserModel.findOne({ 'facebookId': facebookId }).then(userDocument => {
+        if (!userDocument) {
+          resolve(null)
+          return Promise.reject(null)
+        }
+        resolve(userDocument.toUserType())
+      })
+      .catch(error => {
+        if (!error) {
+          return
+        }
+        reject('DataStore getUserByFacebookId error: UserModel findOne error: ' + error)
+      })
     })
   }
 
   createUser: CreateUserPayload => Promise<User> = (payload: CreateUserPayload) => {
     return new Promise((resolve, reject) => {
-      const user: User = {
-        ...payload,
-        id: genId(users),
-      }
-      users.push(user)
-      this._saveUsers().then(writePath => {
-        resolve(user)
+      var newUserDocument = new UserModel(payload)
+      newUserDocument.save().then(userDocument => {
+        if (!userDocument) {
+          reject('DataStore createUser error: UserModel save error: No document returned')
+          return Promise.reject(null)
+        }
+        resolve(userDocument.toUserType())
       })
       .catch(error => {
-        reject('DataStore createUser error: ' + error)
+        if (!error) {
+          return
+        }
+        reject('DataStore createUser error: UserModel save error: ' + error)
       })
     })
   }
@@ -91,17 +95,19 @@ export default class DataStore {
   updateUser: (string, UpdateUserPayload) => Promise<User> =
   (userId: string, payload: UpdateUserPayload) => {
     return new Promise((resolve, reject) => {
-      const user: ?User = users.find(user => user.id === userId)
-      if (!user) {
-        reject('DataStore updateUser error: No user found with given userId.')
-        return
-      }
-      // $FlowFixMe
-      Object.assign(user, payload)
-      this._saveUsers().then(writePath => {
-        resolve(user)
+      UserModel.findByIdAndUpdate(userId, { $set: payload }, { new: true })
+      .then(userDocument => {
+        if (!userDocument) {
+          reject('DataStore updateUser error: UserModel findByIdAndUpdate ' +
+            'error: Returned null document')
+          return Promise.reject(null)
+        }
+        resolve(userDocument.toUserType())
       })
       .catch(error => {
+        if (!error) {
+          return
+        }
         reject('DataStore updateUser error: ' + error)
       })
     })
@@ -109,16 +115,18 @@ export default class DataStore {
 
   deleteUser: string => Promise<User> = (userId: string) => {
     return new Promise((resolve, reject) => {
-      const index: number = users.findIndex(user => user.id === userId)
-      if (index === -1) {
-        reject('DataStore deleteUser error: No user found with given userId.')
-        return
-      }
-      const deletedRecord = users.splice(index, 1)[0]
-      this._saveUsers().then(writePath => {
-        resolve(deletedRecord)
+      UserModel.findByIdAndRemove(userId).then(userDocument => {
+        if (!userDocument) {
+          reject('DataStore deleteUser error: UserModel findByIdAndRemove ' +
+            'error: Returned null document')
+          return Promise.reject(null)
+        }
+        resolve(userDocument.toUserType())
       })
       .catch(error => {
+        if (!error) {
+          return
+        }
         reject('DataStore deleteUser error: ' + error)
       })
     })
@@ -126,41 +134,64 @@ export default class DataStore {
 
   getTrips: () => Promise<Array<Trip>> = () => {
     return new Promise((resolve, reject) => {
-      resolve(trips)
+      TripModel.find().then(tripDocuments => {
+        const trips = _.map(tripDocuments, tripDocument => tripDocument.toTripType())
+        resolve(trips)
+      })
+      .catch(error => {
+        reject('DataStore getTrips error: TripModel find error: ' + error)
+      })
     })
   }
 
   getTripsByUserId: string => Promise<Array<Trip>> = (userId: string) => {
     return new Promise((resolve, reject) => {
-      const userTrips: Array<Trip> = _.filter(trips, trip => trip.userId === userId)
-      resolve(userTrips)
+      TripModel.find({ user: userId }).then(tripDocuments => {
+        const trips = _.map(tripDocuments, tripDocument => tripDocument.toTripType())
+        resolve(trips)
+      })
+      .catch(error => {
+        reject('DataStore getTripsByUserId error: TripModel find error: ' + error)
+      })
     })
   }
 
   getTripById: string => Promise<?Trip> = (tripId: string) => {
     return new Promise((resolve, reject) => {
-      const trip: ?Trip = trips.find(trip => trip.id === tripId)
-      if (!trip) {
-        resolve(null)
-        return
-      }
-      resolve(trip)
+      TripModel.findById(tripId).then(tripDocument => {
+        if (!tripDocument) {
+          resolve(null)
+          return Promise.reject(null)
+        }
+        resolve(tripDocument.toTripType())
+      })
+      .catch(error => {
+        if (!error) {
+          return
+        }
+        reject('DataStore getTripById error: TripModel findById error: ' + error)
+      })
     })
   }
 
   createTrip: (string, CreateTripPayload) => Promise<Trip> =
   (userId: string, payload: CreateTripPayload) => {
     return new Promise((resolve, reject) => {
-      const trip: Trip = {
+      var newTripDocument = new TripModel({
         ...payload,
-        id: genId(trips),
-        userId: userId,
-      }
-      trips.push(trip)
-      this._saveTrips().then(writePath => {
-        resolve(trip)
+        user: userId,
+      })
+      newTripDocument.save().then(tripDocument => {
+        if (!tripDocument) {
+          reject('DataStore createTrip error: TripModel save error: No document returned')
+          return Promise.reject(null)
+        }
+        resolve(tripDocument.toTripType())
       })
       .catch(error => {
+        if (!error) {
+          return
+        }
         reject('DataStore createTrip error: ' + error)
       })
     })
@@ -169,17 +200,19 @@ export default class DataStore {
   updateTrip: (string, UpdateTripPayload) => Promise<Trip> =
   (tripId: string, payload: UpdateTripPayload) => {
     return new Promise((resolve, reject) => {
-      const trip: ?Trip = trips.find(trip => trip.id === tripId)
-      if (!trip) {
-        reject('DataStore updateTrip error: No trip found with given tripId.')
-        return
-      }
-      // $FlowFixMe
-      Object.assign(trip, payload)
-      this._saveTrips().then(writePath => {
-        resolve(trip)
+      TripModel.findByIdAndUpdate(tripId, { $set: payload }, { new: true })
+      .then(tripDocument => {
+        if (!tripDocument) {
+          reject('DataStore updateTrip error: TripModel findByIdAndUpdate ' +
+            'error: No document returned')
+          return Promise.reject(null)
+        }
+        resolve(tripDocument.toTripType())
       })
       .catch(error => {
+        if (!error) {
+          return
+        }
         reject('DataStore updateTrip error: ' + error)
       })
     })
@@ -187,43 +220,19 @@ export default class DataStore {
 
   deleteTrip: string => Promise<Trip> = (tripId: string) => {
     return new Promise((resolve, reject) => {
-      const index: number = trips.findIndex(trip => trip.id === tripId)
-      if (index === -1) {
-        reject('DataStore deleteTrip error: No trip found with given tripId.')
-        return
-      }
-      const deletedRecord = trips.splice(index, 1)[0]
-      this._saveTrips().then(writePath => {
-        resolve(deletedRecord)
+      TripModel.findByIdAndRemove(tripId).then(tripDocument => {
+        if (!tripDocument) {
+          reject('DataStore deleteTrip error: TripModel findByIdAndRemove ' +
+            'error: No document returned')
+          return Promise.reject(null)
+        }
+        resolve(tripDocument.toTripType())
       })
       .catch(error => {
+        if (!error) {
+          return
+        }
         reject('DataStore deleteTrip error: ' + error)
-      })
-    })
-  }
-
-  _saveUsers: () => Promise<string> = () => {
-    return new Promise((resolve, reject) => {
-      saveItems(users, 'users.json').then(writePath => {
-        this.logger(`Users updated. Written to: ` +
-          `${path.relative(path.join(__dirname, '..', '..'), writePath)}`)
-        resolve(writePath)
-      })
-      .catch(error => {
-        reject('DataStore _saveUsers error: ' + error)
-      })
-    })
-  }
-
-  _saveTrips: () => Promise<string> = () => {
-    return new Promise((resolve, reject) => {
-      saveItems(trips, 'trips.json').then(writePath => {
-        this.logger(`Trips updated. Written to: ` +
-          `${path.relative(path.join(__dirname, '..', '..'), writePath)}`)
-        resolve(writePath)
-      })
-      .catch(error => {
-        reject('DataStore _saveTrips error: ' + error)
       })
     })
   }
