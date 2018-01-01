@@ -78,7 +78,7 @@ must be present.
 
 ## Tests
 
-Unit tests and integration tests are written for the Express Routers using Jest
+Unit tests for the Express Routers and integration tests are written using Jest
 and supertest. Tests can be found in the directory `__tests__`.
 
 ## Database
