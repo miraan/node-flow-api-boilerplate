@@ -86,9 +86,26 @@ and supertest. Tests can be found in the directory `__tests__`.
 MongoDB is used to store records, and the mongoose npm package is used to
 interface with the DB.
 
+To install MongoDB, run: `brew install mongodb`
+
+To start an instance of MongoDB, run:
+
+`mongod --dbpath data --bind_ip 127.0.0.1 --port 27017 --auth`
+
+To connect a shell client, run:
+
+`mongo --port 27017 -u 'admin' -p 'password' --authenticationDatabase 'admin'`
+
+You will need to configure the root user account and password for these commands
+to work.
+
 ## Cache
 
 Redis is used to store user tokens to persist authenticated sessions via the API.
+
+To install Redis, run: `brew install redis`
+
+To start a Redis server, run: `redis-server`
 
 ## Configuring the project
 
@@ -118,6 +135,8 @@ type ServerConfiguration = {
 
 1. `npm install -g gulp-cli`
 2. `npm install -g flow-typed`
+3. `brew install redis`
+4. `brew install mongodb`
 
 ## Usage
 
@@ -126,7 +145,9 @@ Clone the repository
 1. `npm install`
 2. `flow-typed install`
 3. `gulp` to watch files and automatically rebuild / flow type check
-4. `npm test` to run unit tests
+4. `redis-server` to start Redis Server
+5. `mongod --dbpath data --bind_ip 127.0.0.1 --port 27017 --auth` to start MongoDB
+4. `npm test` to run unit tests and integration tests
 5. `npm start` to start the server
 6. Develop and remember to run `flow-typed install` after adding a new
 dependency with `npm install --save xxx`
