@@ -137,7 +137,7 @@ describe('Integration Test', () => {
   it('should return 401 for creating trip with general endpoint', () => {
     return request(app).post('/api/v1/trip/')
       .set('Authorization', 'Bearer ' + authenticationToken)
-      .send(createTripPayload)
+      .send(Object.assign({}, createTripPayload, { userId: 'fakeuserid' }))
       .expect(401)
       .then(res => {
         expect(res.body.success).toBe(false)

@@ -145,18 +145,18 @@ export default class TripRouter {
 
   create = (req: $Request, res: $Response) => {
     const user: User = req.user
-    if (!user.level || user.level < 3) {
-      res.status(401).json({
-        success: false,
-        errorMessage: 'Unauthorized.'
-      })
-      return
-    }
     const userId = req.body.userId
     if (!userId) {
       res.status(400).json({
         success: false,
         errorMessage: 'userId for new trip required for this endpoint.'
+      })
+      return
+    }
+    if (userId !== req.user.id && (!user.level || user.level < 3)) {
+      res.status(401).json({
+        success: false,
+        errorMessage: 'Unauthorized.'
       })
       return
     }
