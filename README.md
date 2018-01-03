@@ -18,9 +18,10 @@ The server extends this token to a long lived token, gets the associated Faceboo
 profile and creates a User object with this data or updates the User object if
 one already exists with the retrieved Facebook profile user ID.
 
-Once this login process completes, the server generates a random hex string,
+Once this login process completes, the server generates an authentication token,
 stores it in Redis with the User ID, and returns it as a token to the client to
-use on future requests.
+use on future requests. This token is generated using a secret key from the user ID
+so that we can easily manually expire tokens for specific users at will.
 
 Future client requests can be authenticated if the client passes this token in the
 `Authorization` header, e.g.
