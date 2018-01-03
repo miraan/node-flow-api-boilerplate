@@ -38,7 +38,7 @@ export default class FacebookClient {
           return
         }
         if (res.error) {
-          reject('Get Facebook Profile Error: ' + res.error)
+          reject('Get Facebook Profile Error: ' + res.error.message)
           return
         }
         resolve({

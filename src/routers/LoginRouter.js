@@ -2,10 +2,10 @@
 
 import { Router } from 'express'
 import FacebookClient from '../FacebookClient'
-import crypto from 'crypto'
 import path from 'path'
 import TokenStore from '../stores/TokenStore'
 import DataStore from '../stores/DataStore'
+import { encrypt, decrypt } from '../util/encryption'
 
 import type { Debugger } from 'debug'
 import type { User, CreateUserPayload } from '../util/types'
@@ -71,7 +71,7 @@ export default class LoginRouter {
       }
     })
     .then(user => {
-      const localToken = crypto.randomBytes(20).toString('hex')
+      const localToken = encrypt(user.id)
       this.tokenStore.setToken(localToken, user.id)
       res.status(200).json({
         success: true,
