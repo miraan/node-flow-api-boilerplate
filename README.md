@@ -152,3 +152,10 @@ Clone the repository
 5. `npm start` to start the server
 6. Develop and remember to run `flow-typed install` after adding a new
 dependency with `npm install --save xxx`
+
+## React + Redux + Flow + Bootstrap + React Router frontend
+
+A corresponding Web frontend for this app, built with React, Redux, Flow, React Bootstrap
+and React Router, can be found here:
+
+https://github.com/miraan/react-redux-flow-bootstrap-router-frontend
