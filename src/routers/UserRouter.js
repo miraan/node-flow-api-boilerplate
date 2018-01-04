@@ -158,7 +158,7 @@ export default class UserRouter {
         })
         return Promise.reject(null)
       }
-      if (record.id !== user.id && record.level >= user.level) {
+      if (record.id !== user.id && record.level >= user.level && user.level < 3) {
         res.status(401).json({
           success: false,
           errorMessage: 'Unauthorized.'
@@ -213,7 +213,7 @@ export default class UserRouter {
         })
         return Promise.reject(null)
       }
-      if (record.id !== user.id && record.level >= user.level) {
+      if (record.id !== user.id && record.level >= user.level && user.level < 3) {
         res.status(401).json({
           success: false,
           errorMessage: 'Unauthorized.'
